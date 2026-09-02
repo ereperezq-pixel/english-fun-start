@@ -33,6 +33,11 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}.hidden{display:none!important}.small{font-size:14px;color:#6c7b88}
 .install-banner{background:#fff3b8;border:2px solid #f0cf55;border-radius:16px;padding:15px;margin-bottom:20px;text-align:center}
 @media(max-width:650px){.memory-grid{grid-template-columns:repeat(2,1fr)}.memory-card{min-height:90px}.question{font-size:23px}.header-inner{flex-direction:column}.stats{justify-content:center}}
+
+.speech-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}
+.speech-btn{border:0;border-radius:12px;padding:10px 14px;background:#eef5ff;color:#1d4ed8;font-weight:700;cursor:pointer}
+.speech-btn:hover{transform:translateY(-1px)}
+
 </style>
 </head>
 <body>
@@ -63,6 +68,43 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 <div class="celebration-box"><div style="font-size:70px">🏆</div><h1 id="celebrationTitle">¡Nivel completado!</h1><p id="celebrationText"></p><button class="main-button" onclick="closeCelebration()">➡️ Continuar</button></div></div>
 
 <script>
+// 🔊 Sintetizador de voz — activo especialmente en el Nivel 1.
+let speechEnabled = true;
+
+function speakEnglish(text){
+  if(!speechEnabled || !("speechSynthesis" in window) || !text) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(String(text));
+  u.lang = "en-US";
+  u.rate = 0.82;
+  u.pitch = 1;
+  window.speechSynthesis.speak(u);
+}
+
+function toggleSpeech(){
+  speechEnabled = !speechEnabled;
+  const btn = document.getElementById("speechToggle");
+  if(btn) btn.textContent = speechEnabled ? "🔊 Voz activada" : "🔇 Voz desactivada";
+  if(!speechEnabled && "speechSynthesis" in window) window.speechSynthesis.cancel();
+}
+
+function speakCurrentWord(word){
+  speakEnglish(word);
+}
+
+function speakCurrentSentence(){
+  if(typeof currentSentence !== "undefined" && currentSentence && currentSentence.words){
+    speakEnglish(currentSentence.words.join(" "));
+  }
+}
+
+function speechButtons(){
+  return `<div class="speech-row">
+    <button class="speech-btn" onclick="toggleSpeech()" id="speechToggle">${speechEnabled?"🔊 Voz activada":"🔇 Voz desactivada"}</button>
+    <button class="speech-btn" onclick="speakCurrentSentence()">🔊 Escuchar frase</button>
+  </div>`;
+}
+
 const levels=[
 {title:"Primeras palabras",vocab:[["hello","hola","👋"],["goodbye","adiós","👋"],["yes","sí","✅"],["no","no","❌"],["please","por favor","🙏"],["thanks","gracias","😊"],["book","libro","📕"],["cat","gato","🐱"]],sentences:[{words:["Hello","my","friend"],meaning:"Hola, mi amigo.",curiosity:"Hello es una de las formas más comunes de saludar en inglés."},{words:["Thank","you","very","much"],meaning:"Muchas gracias.",curiosity:"Thank you es una forma muy habitual de dar las gracias."}]},
 {title:"Colores",vocab:[["red","rojo","🔴"],["blue","azul","🔵"],["green","verde","🟢"],["yellow","amarillo","🟡"],["black","negro","⚫"],["white","blanco","⚪"],["pink","rosa","🩷"],["orange","naranja","🟠"]],sentences:[{words:["The","car","is","red"],meaning:"El coche es rojo.",curiosity:"The se utiliza para hablar de algo concreto."},{words:["My","book","is","blue"],meaning:"Mi libro es azul.",curiosity:"My significa 'mi' e indica posesión."}]},
@@ -117,9 +159,11 @@ function startLevel(index){
  if(index>0&&!state.completedLevels.includes(index-1)){alert("🔒 Primero completa el nivel anterior.");return}
  currentLevel=index;state.currentLevel=index;currentGame=0;currentQuestion=0;memoryFirst=null;memoryLocked=false;memoryCompleted=false;sentenceSelected=[];saveState();hideAllScreens();gameScreen.classList.remove("hidden");nextGame()
 }
-function nextGame(){gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else completeLevel()}
+function nextGame(){
+ renderSpeechControls();gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else completeLevel()}
 function gameHeader(title,text){return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/4*100)}%"></div></div></div>`}
 function showVocabularyGame(){
+ setTimeout(()=>{ if(typeof currentVocab!=="undefined" && currentVocab) speakCurrentWord(currentVocab[0]); },350);
  const level=levels[currentLevel],item=level.vocab[currentQuestion%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
  gameContent.innerHTML=`${gameHeader("🖼️ Encuentra la palabra","Mira la imagen y elige la palabra correcta.")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Qué palabra es?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerVocabulary('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="vocabFeedback"></div></div>`
 }
@@ -185,6 +229,31 @@ window.addEventListener("appinstalled",()=>{installBanner.style.display="none"})
 
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 updateStats();showHome();
+
+function renderSpeechControls(){
+  const el=document.getElementById("speech-controls");
+  if(el) el.innerHTML=speechButtons();
+}
+
+
+function announceMemoryMatch(word){
+  if(word) setTimeout(()=>speakEnglish(word),180);
+}
+
+
+document.addEventListener("click", function(e){
+  if(typeof currentLevel === "undefined" || currentLevel !== 0) return;
+  const b=e.target.closest("button");
+  if(!b) return;
+  const t=(b.textContent||"").trim();
+  if(!t || t.includes("Siguiente") || t.includes("Volver") || t.includes("Escuchar") || t.includes("Voz")) return;
+  // If the button is an English vocabulary word, pronounce it.
+  if(typeof levels!=="undefined" && levels[0] && levels[0].vocab){
+    const item=levels[0].vocab.find(v=>String(v[0]).toLowerCase()===t.toLowerCase());
+    if(item) speakEnglish(item[0]);
+  }
+});
+
 </script>
 </body>
 </html>
