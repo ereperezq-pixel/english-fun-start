@@ -212,6 +212,8 @@ function saveState(){localStorage.setItem("englishFunState",JSON.stringify(state
 function updateStats(){statLevel.innerText=state.currentLevel+1;const sc=document.getElementById("statCourse");if(sc)sc.innerText=activeCourse;statXP.innerText=state.xp;statScore.innerText=state.score;statStreak.innerText=state.streak}
 function hideAllScreens(){homeScreen.classList.add("hidden");levelsScreen.classList.add("hidden");gameScreen.classList.add("hidden");testScreen.classList.add("hidden")}
 function showHome(){hideAllScreens();homeScreen.classList.remove("hidden");updateStats()}
+function showLevels(){hideAllScreens();levelsScreen.classList.remove("hidden");renderCourses();renderLevels();updateStats();}
+function startCurrentLevel(){levels=getCourseLevels(activeCourse);const idx=Number(state.currentLevel)||0;startLevel(Math.min(idx,levels.length-1));}
 function courseCompleted(id){return state.completedLevels.filter(x=>String(x).startsWith(id+"-")).length>=20;}
 function completedKey(index){return `${activeCourse}-${index}`;}
 function getCourseLevels(course){return course==="A1"?a1Levels:(course==="A2"?a2Levels:b1Levels);}

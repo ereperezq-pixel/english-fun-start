@@ -1,51 +1,5 @@
-const CACHE_NAME = "english-fun-start-v6";
+const CACHE_NAME = "english-fun-start-v7";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
-
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
-  );
-  self.skipWaiting();
-});
-
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-    )).then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener("fetch", event => {
-  const request = event.request;
-  if (request.method !== "GET") return;
-
-  // Para la página principal usamos red primero: así las futuras actualizaciones
-  // se descargan sin borrar localStorage (XP, puntuación y progreso).
-  if (request.mode === "navigate" || new URL(request.url).pathname.endsWith("/index.html")) {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      try {
-        const response = await fetch(request, { cache: "no-store" });
-        if (response && response.ok) await cache.put("./index.html", response.clone());
-        return response;
-      } catch (error) {
-        return (await cache.match(request)) || (await cache.match("./index.html"));
-      }
-    })());
-    return;
-  }
-
-  event.respondWith((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    try {
-      const response = await fetch(request);
-      if (response && response.ok) await cache.put(request, response.clone());
-      return response;
-    } catch (error) {
-      return new Response("Offline", { status: 503 });
-    }
-  })());
-});
+self.addEventListener("install", event => { event.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_SHELL))); self.skipWaiting(); });
+self.addEventListener("activate", event => { event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
+self.addEventListener("fetch", event => { const r=event.request; if(r.method!=="GET") return; if(r.mode==="navigate" || new URL(r.url).pathname.endsWith("/index.html")){ event.respondWith((async()=>{const c=await caches.open(CACHE_NAME); try{const x=await fetch(r,{cache:"no-store"}); if(x.ok) await c.put("./index.html",x.clone()); return x;}catch(e){return (await c.match(r))||(await c.match("./index.html"));}})()); return;} event.respondWith((async()=>{const c=await caches.open(CACHE_NAME); const x=await c.match(r); if(x)return x; try{const y=await fetch(r); if(y.ok) await c.put(r,y.clone()); return y;}catch(e){return new Response("Offline",{status:503});}})()); });
