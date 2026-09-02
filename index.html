@@ -32,6 +32,7 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 .garland{position:absolute;top:20px;left:0;right:0;font-size:35px;letter-spacing:10px;white-space:nowrap}.confetti{position:absolute;inset:0;pointer-events:none}.confetti-piece{position:absolute;top:-30px;font-size:25px;animation:fall 3s linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}.hidden{display:none!important}.small{font-size:14px;color:#6c7b88}
 .install-banner{background:#fff3b8;border:2px solid #f0cf55;border-radius:16px;padding:15px;margin-bottom:20px;text-align:center}
+.unlock-panel{margin-top:20px;padding:18px;background:#f5faff;border:2px solid #bfd8ea;border-radius:18px}.test-progress{font-size:14px;color:#6c7b88;margin-top:8px}
 @media(max-width:650px){.memory-grid{grid-template-columns:repeat(2,1fr)}.memory-card{min-height:90px}.question{font-size:23px}.header-inner{flex-direction:column}.stats{justify-content:center}}
 
 .speech-box{margin:16px auto;padding:12px;background:#eef7ff;border:2px solid #b9dcff;border-radius:16px;text-align:center;max-width:620px}
@@ -58,8 +59,11 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 <button class="secondary-button" onclick="startCurrentLevel()">▶️ Continuar aprendiendo</button></div>
 </section>
 
-<section id="levelsScreen" class="hidden"><div class="card"><h2>🗺️ Tus niveles</h2><p>Completa cada nivel para desbloquear el siguiente.</p><div class="level-grid" id="levelGrid"></div></div>
+<section id="levelsScreen" class="hidden"><div class="card"><h2>🗺️ Tus niveles</h2><p>Avanza paso a paso. El siguiente nivel se puede desbloquear completando el anterior, superando la prueba final o usando una clave.</p><div class="level-grid" id="levelGrid"></div>
+<div class="unlock-panel center" id="level2UnlockPanel"><h3>🔓 Desbloquear A1 · Nivel 2</h3><p>¿Quieres demostrar lo aprendido antes de pasar al siguiente nivel?</p><button class="main-button" onclick="startFinalTest()">📝 Prueba final · 15 preguntas</button><button class="secondary-button" onclick="unlockWithKey()">🔑 Desbloquear con clave</button><div class="small">La clave de prueba es de 4 cifras.</div></div></div>
 <div class="center"><button class="secondary-button" onclick="showHome()">🏠 Inicio</button></div></section>
+
+<section id="testScreen" class="hidden"><div class="card"><div id="testContent"></div></div><div class="center"><button class="secondary-button" onclick="showLevels()">🗺️ Volver a niveles</button></div></section>
 
 <section id="gameScreen" class="hidden"><div class="card"><div id="gameContent"></div><div id="speechArea"></div></div>
 <div class="center"><button class="secondary-button" onclick="showLevels()">🗺️ Niveles</button><button class="secondary-button" onclick="showHome()">🏠 Inicio</button></div></section>
@@ -69,7 +73,7 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 <div class="celebration-box"><div style="font-size:70px">🏆</div><h1 id="celebrationTitle">¡Nivel completado!</h1><p id="celebrationText"></p><button class="main-button" onclick="closeCelebration()">➡️ Continuar</button></div></div>
 
 <script>
-// 🔊 VOZ — Nivel 1
+// 🔊 VOZ — todos los niveles
 let speechEnabled = true;
 let englishVoice = null;
 
@@ -128,22 +132,22 @@ function renderSpeech(){
 }
 
 function repeatSpeech(){
-  if(typeof currentLevel === "undefined" || currentLevel !== 0) return;
+  if(typeof currentLevel === "undefined") return;
   if(currentGame === 0 && typeof currentQuestion !== "undefined"){
-    const item=levels[0].vocab[currentQuestion % levels[0].vocab.length];
+    const item=levels[currentLevel].vocab[currentQuestion % levels[currentLevel].vocab.length];
     speakEnglish(item[0]);
   }else if(currentGame === 2){
-    const item=levels[0].vocab[(currentQuestion+3)%levels[0].vocab.length];
+    const item=levels[currentLevel].vocab[(currentQuestion+3)%levels[currentLevel].vocab.length];
     speakEnglish(item[0]);
   }else if(currentGame === 3 && typeof sentenceWords !== "undefined"){
-    const s=levels[0].sentences[currentQuestion % levels[0].sentences.length];
+    const s=levels[currentLevel].sentences[currentQuestion % levels[currentLevel].sentences.length];
     speakEnglish(s.words.join(" "));
   }
 }
 
 const levels=[
-{title:"Primeras palabras",vocab:[["hello","hola","👋"],["goodbye","adiós","👋"],["yes","sí","✅"],["no","no","❌"],["please","por favor","🙏"],["thanks","gracias","😊"],["book","libro","📕"],["cat","gato","🐱"]],sentences:[{words:["Hello","my","friend"],meaning:"Hola, mi amigo.",curiosity:"Hello es una de las formas más comunes de saludar en inglés."},{words:["Thank","you","very","much"],meaning:"Muchas gracias.",curiosity:"Thank you es una forma muy habitual de dar las gracias."}]},
-{title:"Colores",vocab:[["red","rojo","🔴"],["blue","azul","🔵"],["green","verde","🟢"],["yellow","amarillo","🟡"],["black","negro","⚫"],["white","blanco","⚪"],["pink","rosa","🩷"],["orange","naranja","🟠"]],sentences:[{words:["The","car","is","red"],meaning:"El coche es rojo.",curiosity:"The se utiliza para hablar de algo concreto."},{words:["My","book","is","blue"],meaning:"Mi libro es azul.",curiosity:"My significa 'mi' e indica posesión."}]},
+{title:"A1 · Primeros pasos",vocab:[["hello","hola","👋"],["goodbye","adiós","👋"],["yes","sí","✅"],["no","no","❌"],["please","por favor","🙏"],["thanks","gracias","😊"],["book","libro","📕"],["cat","gato","🐱"]],sentences:[{words:["Hello","my","friend"],meaning:"Hola, mi amigo.",curiosity:"Hello es una de las formas más comunes de saludar en inglés."},{words:["Thank","you","very","much"],meaning:"Muchas gracias.",curiosity:"Thank you es una forma muy habitual de dar las gracias."}]},
+{title:"A1 · Mi mundo cotidiano",vocab:[["house","casa","🏠"],["room","habitación","🛏️"],["door","puerta","🚪"],["shirt","camiseta","👕"],["shoes","zapatos","👟"],["breakfast","desayuno","🥣"],["water","agua","💧"],["coffee","café","☕"],["brother","hermano","👦"],["sister","hermana","👧"],["morning","mañana","🌅"],["today","hoy","📅"]],sentences:[{words:["This","is","my","house"],meaning:"Esta es mi casa.",curiosity:"This significa 'esto/esta' y se usa para señalar algo cercano."},{words:["I","have","a","brother"],meaning:"Tengo un hermano.",curiosity:"Have significa 'tener' y es una palabra muy importante en A1."},{words:["I","like","pizza"],meaning:"Me gusta la pizza.",curiosity:"I like... es una estructura básica para hablar de gustos."},{words:["I","get","up","at","seven"],meaning:"Me levanto a las siete.",curiosity:"Get up significa 'levantarse'."},{words:["What","time","is","it"],meaning:"¿Qué hora es?",curiosity:"What time is it? es la pregunta habitual para saber la hora."},{words:["I","don't","like","coffee"],meaning:"No me gusta el café.",curiosity:"Don't es la forma corta de do not y sirve para formar una negación con I, you, we y they."}]},
 {title:"Números",vocab:[["one","uno","1️⃣"],["two","dos","2️⃣"],["three","tres","3️⃣"],["four","cuatro","4️⃣"],["five","cinco","5️⃣"],["six","seis","6️⃣"],["seven","siete","7️⃣"],["eight","ocho","8️⃣"]],sentences:[{words:["I","have","two","cats"],meaning:"Tengo dos gatos.",curiosity:"Have significa 'tener'."},{words:["I","see","three","dogs"],meaning:"Veo tres perros.",curiosity:"See significa 'ver'."}]},
 {title:"Personas",vocab:[["man","hombre","👨"],["woman","mujer","👩"],["boy","niño","👦"],["girl","niña","👧"],["friend","amigo","🧑‍🤝‍🧑"],["teacher","profesor","👨‍🏫"],["student","estudiante","🎓"],["baby","bebé","👶"]],sentences:[{words:["She","is","a","teacher"],meaning:"Ella es profesora.",curiosity:"She significa 'ella'."},{words:["He","is","my","friend"],meaning:"Él es mi amigo.",curiosity:"He significa 'él'."}]},
 {title:"Familia",vocab:[["mother","madre","👩"],["father","padre","👨"],["brother","hermano","👦"],["sister","hermana","👧"],["son","hijo","👦"],["daughter","hija","👧"],["family","familia","👨‍👩‍👧‍👦"],["grandma","abuela","👵"]],sentences:[{words:["My","family","is","big"],meaning:"Mi familia es grande.",curiosity:"Big significa 'grande'."},{words:["This","is","my","mother"],meaning:"Esta es mi madre.",curiosity:"This significa 'esto/esta'."}]},
@@ -164,36 +168,89 @@ const levels=[
 {title:"Repaso general",vocab:[["friend","amigo","🧑‍🤝‍🧑"],["family","familia","👨‍👩‍👧‍👦"],["house","casa","🏠"],["school","colegio","🏫"],["food","comida","🍎"],["animal","animal","🐾"],["water","agua","💧"],["happy","feliz","😊"]],sentences:[{words:["I","am","happy","today"],meaning:"Estoy feliz hoy.",curiosity:"Today significa 'hoy'."},{words:["My","family","is","at","home"],meaning:"Mi familia está en casa.",curiosity:"At home es una expresión muy habitual que significa 'en casa'."}]}
 ];
 
-// Los 20 niveles están publicados y se desbloquean uno a uno al completar el anterior.
+// Los 20 niveles están publicados. El desbloqueo normal es secuencial; A1 · Nivel 2 también puede abrirse con prueba final o clave.
 const PUBLISHED_LEVELS = 20;
 
-let state=JSON.parse(localStorage.getItem("englishFunState"))||{currentLevel:0,xp:0,score:0,streak:0,completedLevels:[],stars:{},difficultWords:{}};
+let state=JSON.parse(localStorage.getItem("englishFunState"))||{currentLevel:0,xp:0,score:0,streak:0,completedLevels:[],stars:{},difficultWords:{},unlockedLevels:[0]};
+if(!Array.isArray(state.unlockedLevels)) state.unlockedLevels=[0];
+if(!state.unlockedLevels.includes(0)) state.unlockedLevels.unshift(0);
+if(state.completedLevels.includes(0)&&!state.unlockedLevels.includes(1)) state.unlockedLevels.push(1);
 let currentLevel=0,currentGame=0,currentQuestion=0,memoryCards=[],memoryFirst=null,memoryLocked=false,memoryCompleted=false,sentenceWords=[],sentenceSelected=[];
+let finalTestIndex=0,finalTestScore=0,finalTestQuestions=[];
 
 function saveState(){localStorage.setItem("englishFunState",JSON.stringify(state));updateStats()}
 function updateStats(){statLevel.innerText=state.currentLevel+1;statXP.innerText=state.xp;statScore.innerText=state.score;statStreak.innerText=state.streak}
-function hideAllScreens(){homeScreen.classList.add("hidden");levelsScreen.classList.add("hidden");gameScreen.classList.add("hidden")}
+function hideAllScreens(){homeScreen.classList.add("hidden");levelsScreen.classList.add("hidden");gameScreen.classList.add("hidden");testScreen.classList.add("hidden")}
 function showHome(){hideAllScreens();homeScreen.classList.remove("hidden");updateStats()}
 function showLevels(){hideAllScreens();levelsScreen.classList.remove("hidden");renderLevels()}
 function startCurrentLevel(){startLevel(state.currentLevel)}
+function isLevelUnlocked(index){return index<PUBLISHED_LEVELS&&(index===0||state.unlockedLevels.includes(index));}
+function unlockLevel2(reason){
+ if(!state.unlockedLevels.includes(1)) state.unlockedLevels.push(1);
+ state.xp+=50; state.score+=50;
+ saveState();
+ alert(reason+"\n\n🔓 A1 · Nivel 2 ya está desbloqueado.");
+ renderLevels();
+}
 function renderLevels(){
  levelGrid.innerHTML="";
  levels.forEach((level,index)=>{
   const published=index<PUBLISHED_LEVELS;
-  const unlocked=published&&(index===0||state.completedLevels.includes(index-1));
+  const unlocked=published&&isLevelUnlocked(index);
   const completed=state.completedLevels.includes(index);
   const b=document.createElement("button");
   b.className="level-button "+(unlocked?"unlocked ":"locked ")+(completed?"completed":"");
   b.disabled=!unlocked;
-  b.innerHTML=`<div class="level-number">NIVEL ${index+1}</div><div class="level-title">${completed?"✅ ":""}${!published?"🔒 ":!unlocked?"🔒 ":""}${level.title}</div><div class="small">${completed?"Nivel completado":!published?"Próximamente":unlocked?"Pulsa para empezar":"Completa el nivel anterior"}</div>`;
+  b.innerHTML=`<div class="level-number">${index===0?"A1 · BLOQUE 1":"NIVEL "+(index+1)}</div><div class="level-title">${completed?"✅ ":""}${!published?"🔒 ":!unlocked?"🔒 ":""}${level.title}</div><div class="small">${completed?"Nivel completado":!published?"Próximamente":unlocked?"Pulsa para empezar":"Completa o desbloquea el nivel anterior"}</div>`;
   if(unlocked)b.onclick=()=>startLevel(index);
   levelGrid.appendChild(b);
  });
+ const panel=document.getElementById("level2UnlockPanel");
+ if(panel) panel.innerHTML=isLevelUnlocked(1)?`<h3>🎉 A1 · Nivel 2 desbloqueado</h3><p>Ya puedes continuar con <strong>A1 · Mi mundo cotidiano</strong>.</p><button class="main-button" onclick="startLevel(1)">▶️ Empezar A1 · Nivel 2</button>`:`<h3>🔓 Desbloquear A1 · Nivel 2</h3><p>Puedes avanzar de tres formas: completar A1 · Nivel 1, superar la prueba final de 15 preguntas o introducir la clave.</p><button class="main-button" onclick="startFinalTest()">📝 Prueba final · 15 preguntas</button><button class="secondary-button" onclick="unlockWithKey()">🔑 Desbloquear con clave</button><div class="small">La clave de prueba es de 4 cifras.</div>`;
 }
 function startLevel(index){
  if(index>=PUBLISHED_LEVELS){alert("🔒 Este nivel llegará en una próxima actualización.");return}
- if(index>0&&!state.completedLevels.includes(index-1)){alert("🔒 Primero completa el nivel anterior.");return}
+ if(!isLevelUnlocked(index)){alert("🔒 Este nivel está bloqueado. Completa el anterior, supera la prueba final o desbloquéalo con la clave.");return}
  currentLevel=index;state.currentLevel=index;currentGame=0;currentQuestion=0;memoryFirst=null;memoryLocked=false;memoryCompleted=false;sentenceSelected=[];saveState();hideAllScreens();gameScreen.classList.remove("hidden");nextGame()
+}
+function unlockWithKey(){
+ if(isLevelUnlocked(1)){alert("🎉 A1 · Nivel 2 ya está desbloqueado.");return}
+ const key=prompt("🔑 Introduce la clave para desbloquear A1 · Nivel 2:");
+ if(key===null)return;
+ if(String(key).trim()==="1111") unlockLevel2("✅ Clave correcta.");
+ else alert("❌ Clave incorrecta. Inténtalo de nuevo.");
+}
+function startFinalTest(){
+ if(isLevelUnlocked(1)){alert("🎉 A1 · Nivel 2 ya está desbloqueado.");return}
+ finalTestIndex=0;finalTestScore=0;
+ const base=levels[0].vocab;
+ finalTestQuestions=shuffle(base.concat(base).concat(base)).slice(0,15).map(item=>{
+   const options=shuffle(base.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);
+   options.push(item[0]);
+   return {spanish:item[1],english:item[0],emoji:item[2],options:shuffle(options)};
+ });
+ hideAllScreens();testScreen.classList.remove("hidden");showFinalTestQuestion();
+}
+function showFinalTestQuestion(){
+ const q=finalTestQuestions[finalTestIndex];
+ testContent.innerHTML=`<div class="center"><div class="small">PRUEBA FINAL · A1 BLOQUE 1</div><h2>📝 Pregunta ${finalTestIndex+1} de 15</h2><div class="progress"><div class="progress-bar" style="width:${(finalTestIndex/15)*100}%"></div></div><div class="vocab-image">${q.emoji}</div><div class="question">¿Cómo se dice <strong>${q.spanish}</strong> en inglés?</div><div class="answers">${q.options.map(o=>`<button class="answer" onclick="answerFinalTest('${esc(o)}','${esc(q.english)}')">${o}</button>`).join("")}</div><div class="test-progress">Necesitas al menos 12 respuestas correctas de 15 para superar la prueba.</div><div id="testFeedback"></div></div>`;
+ if(speechEnabled)setTimeout(()=>speakEnglish(q.english),300);
+}
+function answerFinalTest(answer,correct){
+ const buttons=document.querySelectorAll("#testContent .answer");buttons.forEach(b=>b.disabled=true);
+ const ok=answer===correct;if(ok){finalTestScore++;state.xp+=10;state.score+=10;state.streak++;speakEnglish(correct);testFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!</div>`}else{state.streak=0;speakEnglish(correct);testFeedback.innerHTML=`<div class="feedback wrong">❌ La respuesta correcta es <strong>${correct}</strong>.</div>`}
+ saveState();
+ setTimeout(()=>{finalTestIndex++;if(finalTestIndex<15)showFinalTestQuestion();else finishFinalTest()},850);
+}
+function finishFinalTest(){
+ const passed=finalTestScore>=12;
+ if(passed){
+   if(!state.unlockedLevels.includes(1))state.unlockedLevels.push(1);
+   state.xp+=100;state.score+=100;state.stars[0]=Math.max(state.stars[0]||0,3);saveState();
+   testContent.innerHTML=`<div class="center"><div style="font-size:70px">🎉</div><h1>¡Prueba superada!</h1><p>Has acertado <strong>${finalTestScore} de 15</strong>.</p><div class="feedback correct"><strong>🔓 A1 · Nivel 2 desbloqueado</strong><br>Has conseguido +100 XP por superar la prueba.</div><button class="main-button" onclick="startLevel(1)">➡️ Empezar A1 · Nivel 2</button><button class="secondary-button" onclick="showLevels()">🗺️ Ver niveles</button></div>`;
+ }else{
+   testContent.innerHTML=`<div class="center"><div style="font-size:70px">💪</div><h1>¡Casi!</h1><p>Has acertado <strong>${finalTestScore} de 15</strong>.</p><div class="feedback wrong">Necesitas 12 aciertos para superar la prueba. Repasa A1 · Nivel 1 y vuelve a intentarlo.</div><button class="main-button" onclick="startFinalTest()">🔄 Repetir prueba</button><button class="secondary-button" onclick="showLevels()">🗺️ Volver a niveles</button></div>`;
+ }
 }
 function nextGame(){gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else completeLevel()}
 function gameHeader(title,text){return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/4*100)}%"></div></div></div>`}
@@ -201,7 +258,7 @@ function showVocabularyGame(){
  const level=levels[currentLevel],item=level.vocab[currentQuestion%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
  gameContent.innerHTML=`${gameHeader("🖼️ Encuentra la palabra","Mira la imagen y elige la palabra correcta.")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Qué palabra es?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerVocabulary('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="vocabFeedback"></div></div>`
 
- renderSpeech(); if(currentLevel===0) setTimeout(()=>speakEnglish(levels[0].vocab[currentQuestion%levels[0].vocab.length][0]),350);
+ renderSpeech(); setTimeout(()=>speakEnglish(levels[currentLevel].vocab[currentQuestion%levels[currentLevel].vocab.length][0]),350);
 }
 function answerVocabulary(a,c){if(a===c){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},700)}else{state.streak=0;vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.</div>`;saveState()}}
 function showMemoryGame(){
@@ -216,7 +273,7 @@ function showMemoryGame(){
 }
 function flipMemory(index){
  if(memoryLocked||memoryCompleted)return;const card=document.getElementById("memory-"+index);if(!card||card.classList.contains("found")||card.dataset.open==="true")return;
- card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value; if(currentLevel===0 && /^[A-Za-z]/.test(card.dataset.value)) speakEnglish(card.dataset.value);
+ card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value; if(/^[A-Za-z]/.test(card.dataset.value)) speakEnglish(card.dataset.value);
  if(!memoryFirst){memoryFirst=card;return}
  if(memoryFirst.dataset.word===card.dataset.word){
   memoryFirst.classList.add("found");card.classList.add("found");memoryFirst.classList.remove("open");card.classList.remove("open");memoryFirst.dataset.open="false";card.dataset.open="false";memoryFirst=null;
@@ -234,7 +291,7 @@ function showQuizGame(){
  const level=levels[currentLevel],item=level.vocab[(currentQuestion+3)%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
  gameContent.innerHTML=`${gameHeader("❓ Quiz","¿Recuerdas esta palabra?")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Cómo se dice <strong>${item[1]}</strong> en inglés?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerQuiz('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="quizFeedback"></div></div>`
 
- renderSpeech(); if(currentLevel===0) setTimeout(()=>speakEnglish(levels[0].vocab[(currentQuestion+3)%levels[0].vocab.length][0]),350);
+ renderSpeech(); setTimeout(()=>speakEnglish(levels[currentLevel].vocab[(currentQuestion+3)%levels[currentLevel].vocab.length][0]),350);
 }
 function answerQuiz(a,c){if(a===c){speakEnglish(c);state.xp+=15;state.score+=15;state.streak++;quizFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showQuizGame()},700)}else{state.streak=0;quizFeedback.innerHTML=`<div class="feedback wrong">❌ No pasa nada.<br>La respuesta correcta era: <strong>${c}</strong>.</div>`;saveState()}}
 function showSentenceGame(){
@@ -251,10 +308,10 @@ function checkSentence(){
  if(user.toLowerCase()===correct.toLowerCase()){speakEnglish(correct);state.xp+=30;state.score+=30;state.streak++;sentenceFeedback.innerHTML=`<div class="feedback correct">🎉 <strong>¡Perfecto!</strong><div class="explanation"><strong>🇪🇸 Significado:</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=levels[currentLevel].sentences.length){currentQuestion=0;currentGame++;nextGame()}else showSentenceGame()},1700)}
  else{speakEnglish(correct);state.streak=0;sentenceFeedback.innerHTML=`<div class="feedback wrong">❌ <strong>Todavía no.</strong><div class="explanation"><strong>Lo que has escrito:</strong><br>${user||"(nada)"}<br><br><strong>✅ La frase correcta:</strong><br>${correct}<br><br><strong>🇪🇸 ¿Qué significa?</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState()}
 }
-function completeLevel(){if(state.completedLevels.includes(currentLevel)){showLevels();return}state.completedLevels.push(currentLevel);state.xp+=100;state.score+=100;state.streak++;state.stars[currentLevel]=3;if(currentLevel+1<PUBLISHED_LEVELS)state.currentLevel=currentLevel+1;saveState();showCelebration()}
+function completeLevel(){if(state.completedLevels.includes(currentLevel)){showLevels();return}state.completedLevels.push(currentLevel);state.xp+=100;state.score+=100;state.streak++;state.stars[currentLevel]=3;if(currentLevel+1<PUBLISHED_LEVELS){if(!state.unlockedLevels.includes(currentLevel+1))state.unlockedLevels.push(currentLevel+1);state.currentLevel=currentLevel+1}saveState();showCelebration()}
 function showCelebration(){
  const next=currentLevel+1;
- if(next<PUBLISHED_LEVELS){celebrationTitle.innerText="🎉 ¡Nivel completado!";celebrationText.innerHTML=`Has terminado <strong>Nivel ${currentLevel+1}</strong>.<br><br>🔓 ¡El nivel ${next+1} está desbloqueado!<br><br>⭐ +100 XP`}
+ if(next<PUBLISHED_LEVELS){celebrationTitle.innerText="🎉 ¡Nivel completado!";celebrationText.innerHTML=`Has terminado <strong>${levels[currentLevel].title}</strong>.<br><br>🔓 ¡${levels[next].title} está desbloqueado!<br><br>⭐ +100 XP`}
  else{celebrationTitle.innerText="🏆 ¡Has completado lo publicado!";celebrationText.innerHTML=`Has terminado <strong>Nivel ${currentLevel+1}</strong>.<br><br>🔒 Los siguientes niveles llegarán en futuras actualizaciones.<br><br>⭐ +100 XP`}
  createConfetti();celebration.classList.add("show")
 }
