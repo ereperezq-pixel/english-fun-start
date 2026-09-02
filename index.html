@@ -34,9 +34,10 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 .install-banner{background:#fff3b8;border:2px solid #f0cf55;border-radius:16px;padding:15px;margin-bottom:20px;text-align:center}
 @media(max-width:650px){.memory-grid{grid-template-columns:repeat(2,1fr)}.memory-card{min-height:90px}.question{font-size:23px}.header-inner{flex-direction:column}.stats{justify-content:center}}
 
-.speech-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}
-.speech-btn{border:0;border-radius:12px;padding:10px 14px;background:#eef5ff;color:#1d4ed8;font-weight:700;cursor:pointer}
-.speech-btn:hover{transform:translateY(-1px)}
+.speech-box{margin:16px auto;padding:12px;background:#eef7ff;border:2px solid #b9dcff;border-radius:16px;text-align:center;max-width:620px}
+.speech-button{border:0;border-radius:14px;background:#2575fc;color:#fff;padding:13px 20px;font-size:18px;font-weight:bold;margin:4px;cursor:pointer}
+.speech-button.secondary{background:#fff;color:#2575fc;border:2px solid #2575fc}
+.speech-status{font-size:13px;color:#5d7182;margin-top:6px}
 
 </style>
 </head>
@@ -60,7 +61,7 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 <section id="levelsScreen" class="hidden"><div class="card"><h2>🗺️ Tus niveles</h2><p>Completa cada nivel para desbloquear el siguiente.</p><div class="level-grid" id="levelGrid"></div></div>
 <div class="center"><button class="secondary-button" onclick="showHome()">🏠 Inicio</button></div></section>
 
-<section id="gameScreen" class="hidden"><div class="card"><div id="gameContent"></div></div>
+<section id="gameScreen" class="hidden"><div class="card"><div id="gameContent"></div><div id="speechArea"></div></div>
 <div class="center"><button class="secondary-button" onclick="showLevels()">🗺️ Niveles</button><button class="secondary-button" onclick="showHome()">🏠 Inicio</button></div></section>
 </main>
 
@@ -68,41 +69,76 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 <div class="celebration-box"><div style="font-size:70px">🏆</div><h1 id="celebrationTitle">¡Nivel completado!</h1><p id="celebrationText"></p><button class="main-button" onclick="closeCelebration()">➡️ Continuar</button></div></div>
 
 <script>
-// 🔊 Sintetizador de voz — activo especialmente en el Nivel 1.
+// 🔊 VOZ — Nivel 1
 let speechEnabled = true;
+let englishVoice = null;
+
+function loadEnglishVoice(){
+  if(!("speechSynthesis" in window)) return;
+  const voices = window.speechSynthesis.getVoices();
+  englishVoice = voices.find(v => /^en-GB/i.test(v.lang))
+             || voices.find(v => /^en-US/i.test(v.lang))
+             || voices.find(v => /^en/i.test(v.lang))
+             || null;
+}
+if("speechSynthesis" in window){
+  loadEnglishVoice();
+  window.speechSynthesis.onvoiceschanged = loadEnglishVoice;
+}
 
 function speakEnglish(text){
-  if(!speechEnabled || !("speechSynthesis" in window) || !text) return;
+  if(!speechEnabled || !text || !("speechSynthesis" in window)){
+    if(!("speechSynthesis" in window)){
+      alert("Este navegador no tiene sintetizador de voz disponible.");
+    }
+    return;
+  }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(String(text));
-  u.lang = "en-US";
-  u.rate = 0.82;
+  u.lang = englishVoice ? englishVoice.lang : "en-GB";
+  if(englishVoice) u.voice = englishVoice;
+  u.rate = 0.78;
   u.pitch = 1;
+  window.speechSynthesis.speak(u);
+}
+
+function speakSpanish(text){
+  if(!speechEnabled || !text || !("speechSynthesis" in window)) return;
+  const u = new SpeechSynthesisUtterance(String(text));
+  u.lang = "es-ES";
+  u.rate = 0.88;
   window.speechSynthesis.speak(u);
 }
 
 function toggleSpeech(){
   speechEnabled = !speechEnabled;
-  const btn = document.getElementById("speechToggle");
-  if(btn) btn.textContent = speechEnabled ? "🔊 Voz activada" : "🔇 Voz desactivada";
   if(!speechEnabled && "speechSynthesis" in window) window.speechSynthesis.cancel();
+  renderSpeech();
 }
 
-function speakCurrentWord(word){
-  speakEnglish(word);
+function renderSpeech(){
+  const el=document.getElementById("speechArea");
+  if(!el) return;
+  el.innerHTML = `
+    <div class="speech-box">
+      <button class="speech-button" onclick="repeatSpeech()">🔊 ESCUCHAR</button>
+      <button class="speech-button secondary" onclick="toggleSpeech()">${speechEnabled?"🔊 Voz activada":"🔇 Voz desactivada"}</button>
+      <div class="speech-status">${speechEnabled?"Pulsa ESCUCHAR para oír el inglés.":"La voz está desactivada."}</div>
+    </div>`;
 }
 
-function speakCurrentSentence(){
-  if(typeof currentSentence !== "undefined" && currentSentence && currentSentence.words){
-    speakEnglish(currentSentence.words.join(" "));
+function repeatSpeech(){
+  if(typeof currentLevel === "undefined" || currentLevel !== 0) return;
+  if(currentGame === 0 && typeof currentQuestion !== "undefined"){
+    const item=levels[0].vocab[currentQuestion % levels[0].vocab.length];
+    speakEnglish(item[0]);
+  }else if(currentGame === 2){
+    const item=levels[0].vocab[(currentQuestion+3)%levels[0].vocab.length];
+    speakEnglish(item[0]);
+  }else if(currentGame === 3 && typeof sentenceWords !== "undefined"){
+    const s=levels[0].sentences[currentQuestion % levels[0].sentences.length];
+    speakEnglish(s.words.join(" "));
   }
-}
-
-function speechButtons(){
-  return `<div class="speech-row">
-    <button class="speech-btn" onclick="toggleSpeech()" id="speechToggle">${speechEnabled?"🔊 Voz activada":"🔇 Voz desactivada"}</button>
-    <button class="speech-btn" onclick="speakCurrentSentence()">🔊 Escuchar frase</button>
-  </div>`;
 }
 
 const levels=[
@@ -159,15 +195,15 @@ function startLevel(index){
  if(index>0&&!state.completedLevels.includes(index-1)){alert("🔒 Primero completa el nivel anterior.");return}
  currentLevel=index;state.currentLevel=index;currentGame=0;currentQuestion=0;memoryFirst=null;memoryLocked=false;memoryCompleted=false;sentenceSelected=[];saveState();hideAllScreens();gameScreen.classList.remove("hidden");nextGame()
 }
-function nextGame(){
- renderSpeechControls();gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else completeLevel()}
+function nextGame(){gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else completeLevel()}
 function gameHeader(title,text){return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/4*100)}%"></div></div></div>`}
 function showVocabularyGame(){
- setTimeout(()=>{ if(typeof currentVocab!=="undefined" && currentVocab) speakCurrentWord(currentVocab[0]); },350);
  const level=levels[currentLevel],item=level.vocab[currentQuestion%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
  gameContent.innerHTML=`${gameHeader("🖼️ Encuentra la palabra","Mira la imagen y elige la palabra correcta.")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Qué palabra es?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerVocabulary('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="vocabFeedback"></div></div>`
+
+ renderSpeech(); if(currentLevel===0) setTimeout(()=>speakEnglish(levels[0].vocab[currentQuestion%levels[0].vocab.length][0]),350);
 }
-function answerVocabulary(a,c){if(a===c){state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},700)}else{state.streak=0;vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.</div>`;saveState()}}
+function answerVocabulary(a,c){if(a===c){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},700)}else{state.streak=0;vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.</div>`;saveState()}}
 function showMemoryGame(){
  const selected=shuffle(levels[currentLevel].vocab).slice(0,4);memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryCards=[];
  selected.forEach(i=>{memoryCards.push({word:i[0],value:i[2]});memoryCards.push({word:i[0],value:i[0]})});memoryCards=shuffle(memoryCards);
@@ -175,10 +211,12 @@ function showMemoryGame(){
  memoryCards.forEach((c,i)=>h+=`<button id="memory-${i}" class="memory-card" data-word="${esc(c.word)}" data-value="${esc(c.value)}" data-open="false" onclick="flipMemory(${i})">❓</button>`);
  h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>¡Muy bien! Has relacionado las imágenes con las palabras.</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
  gameContent.innerHTML=h
+
+ renderSpeech();
 }
 function flipMemory(index){
  if(memoryLocked||memoryCompleted)return;const card=document.getElementById("memory-"+index);if(!card||card.classList.contains("found")||card.dataset.open==="true")return;
- card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value;
+ card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value; if(currentLevel===0 && /^[A-Za-z]/.test(card.dataset.value)) speakEnglish(card.dataset.value);
  if(!memoryFirst){memoryFirst=card;return}
  if(memoryFirst.dataset.word===card.dataset.word){
   memoryFirst.classList.add("found");card.classList.add("found");memoryFirst.classList.remove("open");card.classList.remove("open");memoryFirst.dataset.open="false";card.dataset.open="false";memoryFirst=null;
@@ -195,19 +233,23 @@ function finishMemoryGame(){if(!memoryCompleted)return;currentGame++;currentQues
 function showQuizGame(){
  const level=levels[currentLevel],item=level.vocab[(currentQuestion+3)%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
  gameContent.innerHTML=`${gameHeader("❓ Quiz","¿Recuerdas esta palabra?")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Cómo se dice <strong>${item[1]}</strong> en inglés?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerQuiz('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="quizFeedback"></div></div>`
+
+ renderSpeech(); if(currentLevel===0) setTimeout(()=>speakEnglish(levels[0].vocab[(currentQuestion+3)%levels[0].vocab.length][0]),350);
 }
-function answerQuiz(a,c){if(a===c){state.xp+=15;state.score+=15;state.streak++;quizFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showQuizGame()},700)}else{state.streak=0;quizFeedback.innerHTML=`<div class="feedback wrong">❌ No pasa nada.<br>La respuesta correcta era: <strong>${c}</strong>.</div>`;saveState()}}
+function answerQuiz(a,c){if(a===c){speakEnglish(c);state.xp+=15;state.score+=15;state.streak++;quizFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showQuizGame()},700)}else{state.streak=0;quizFeedback.innerHTML=`<div class="feedback wrong">❌ No pasa nada.<br>La respuesta correcta era: <strong>${c}</strong>.</div>`;saveState()}}
 function showSentenceGame(){
  const s=levels[currentLevel].sentences[currentQuestion%levels[currentLevel].sentences.length];sentenceWords=shuffle(s.words.map((word,id)=>({id,word})));sentenceSelected=[];
  gameContent.innerHTML=`${gameHeader("🧩 Construye la frase","Las palabras están desordenadas. Pulsa en ellas para formar la frase.")}<div class="center"><div class="question">💬 Ordena la frase</div><div id="sentenceArea" class="sentence-area"><span class="small">Pulsa las palabras de abajo...</span></div><div id="sentenceOptions" class="answers">${sentenceWords.map(i=>`<button id="word-${i.id}" class="word-button" onclick="selectSentenceWord(${i.id})">${i.word}</button>`).join("")}</div><br><button class="main-button" onclick="checkSentence()">✅ Comprobar</button><div id="sentenceFeedback"></div></div>`
+
+ renderSpeech();
 }
 function selectSentenceWord(id){const item=sentenceWords.find(x=>x.id===id);if(!item||sentenceSelected.some(x=>x.id===id))return;sentenceSelected.push(item);const b=document.getElementById("word-"+id);if(b){b.disabled=true;b.style.opacity=".45"}renderSentenceArea()}
 function renderSentenceArea(){sentenceArea.innerHTML=sentenceSelected.length?sentenceSelected.map(i=>`<button class="word-button" onclick="removeSentenceWord(${i.id})">${i.word}</button>`).join(""):`<span class="small">Pulsa las palabras de abajo...</span>`}
 function removeSentenceWord(id){sentenceSelected=sentenceSelected.filter(x=>x.id!==id);const b=document.getElementById("word-"+id);if(b){b.disabled=false;b.style.opacity="1"}renderSentenceArea()}
 function checkSentence(){
  const s=levels[currentLevel].sentences[currentQuestion%levels[currentLevel].sentences.length],user=sentenceSelected.map(x=>x.word).join(" "),correct=s.words.join(" ");
- if(user.toLowerCase()===correct.toLowerCase()){state.xp+=30;state.score+=30;state.streak++;sentenceFeedback.innerHTML=`<div class="feedback correct">🎉 <strong>¡Perfecto!</strong><div class="explanation"><strong>🇪🇸 Significado:</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=levels[currentLevel].sentences.length){currentQuestion=0;currentGame++;nextGame()}else showSentenceGame()},1700)}
- else{state.streak=0;sentenceFeedback.innerHTML=`<div class="feedback wrong">❌ <strong>Todavía no.</strong><div class="explanation"><strong>Lo que has escrito:</strong><br>${user||"(nada)"}<br><br><strong>✅ La frase correcta:</strong><br>${correct}<br><br><strong>🇪🇸 ¿Qué significa?</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState()}
+ if(user.toLowerCase()===correct.toLowerCase()){speakEnglish(correct);state.xp+=30;state.score+=30;state.streak++;sentenceFeedback.innerHTML=`<div class="feedback correct">🎉 <strong>¡Perfecto!</strong><div class="explanation"><strong>🇪🇸 Significado:</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=levels[currentLevel].sentences.length){currentQuestion=0;currentGame++;nextGame()}else showSentenceGame()},1700)}
+ else{speakEnglish(correct);state.streak=0;sentenceFeedback.innerHTML=`<div class="feedback wrong">❌ <strong>Todavía no.</strong><div class="explanation"><strong>Lo que has escrito:</strong><br>${user||"(nada)"}<br><br><strong>✅ La frase correcta:</strong><br>${correct}<br><br><strong>🇪🇸 ¿Qué significa?</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState()}
 }
 function completeLevel(){if(state.completedLevels.includes(currentLevel)){showLevels();return}state.completedLevels.push(currentLevel);state.xp+=100;state.score+=100;state.streak++;state.stars[currentLevel]=3;if(currentLevel+1<PUBLISHED_LEVELS)state.currentLevel=currentLevel+1;saveState();showCelebration()}
 function showCelebration(){
@@ -229,31 +271,6 @@ window.addEventListener("appinstalled",()=>{installBanner.style.display="none"})
 
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 updateStats();showHome();
-
-function renderSpeechControls(){
-  const el=document.getElementById("speech-controls");
-  if(el) el.innerHTML=speechButtons();
-}
-
-
-function announceMemoryMatch(word){
-  if(word) setTimeout(()=>speakEnglish(word),180);
-}
-
-
-document.addEventListener("click", function(e){
-  if(typeof currentLevel === "undefined" || currentLevel !== 0) return;
-  const b=e.target.closest("button");
-  if(!b) return;
-  const t=(b.textContent||"").trim();
-  if(!t || t.includes("Siguiente") || t.includes("Volver") || t.includes("Escuchar") || t.includes("Voz")) return;
-  // If the button is an English vocabulary word, pronounce it.
-  if(typeof levels!=="undefined" && levels[0] && levels[0].vocab){
-    const item=levels[0].vocab.find(v=>String(v[0]).toLowerCase()===t.toLowerCase());
-    if(item) speakEnglish(item[0]);
-  }
-});
-
 </script>
 </body>
 </html>
