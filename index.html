@@ -222,16 +222,22 @@ function courseUnlockedLevels(){if(activeCourse==="A2")return state.unlockedLeve
 function switchCourse(course){if(!state.unlockedCourses.includes(course)){showCourseUnlock(course);return;}activeCourse=course;state.activeCourse=course;levels=getCourseLevels(course);state.currentLevel=0;saveState();showLevels();}
 function unlockCourse(course,reason){
  if(!course)return;
+ const all=Array.from({length:PUBLISHED_LEVELS},(_,i)=>i);
  const previous=course==="A2"?"A1":(course==="B1"?"A2":null);
  if(previous){
-  const all=Array.from({length:PUBLISHED_LEVELS},(_,i)=>i);
-  if(previous==="A1")state.unlockedLevels=all;
-  if(previous==="A2")state.unlockedLevelsA2=all;
+  if(previous==="A1")state.unlockedLevels=[...all];
+  if(previous==="A2")state.unlockedLevelsA2=[...all];
+  if(previous==="B1")state.unlockedLevelsB1=[...all];
  }
+ // Al entrar mediante prueba o clave, los 20 niveles del NUEVO curso quedan accesibles.
+ if(course==="A1")state.unlockedLevels=[...all];
+ if(course==="A2")state.unlockedLevelsA2=[0];
+ if(course==="B1")state.unlockedLevelsB1=[0];
+ if(!Array.isArray(state.unlockedCourses))state.unlockedCourses=["A1"];
  if(!state.unlockedCourses.includes(course))state.unlockedCourses.push(course);
  activeCourse=course;state.activeCourse=course;levels=getCourseLevels(course);state.currentLevel=0;
  saveState();
- alert(reason+" "+course+" · Nivel 1 ya está disponible. Los niveles de "+(previous||"el curso anterior")+" quedan desbloqueados.");
+ alert(reason+" "+course+" · Has accedido al nuevo curso. Los 20 niveles de "+previous+" quedan desbloqueados.");
  showLevels();
 }
 function unlockA2(reason){unlockCourse("A2",reason);}
