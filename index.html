@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2575fc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="English Fun Start">
+<link rel="manifest" href="manifest.webmanifest">
+<title>English Fun Start</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#eaf7ff;color:#17324d}
+button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;box-shadow:0 2px 10px rgba(0,0,0,.08);position:sticky;top:0;z-index:20}
+.header-inner{max-width:1000px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:15px}
+.logo{font-size:24px;font-weight:bold}.stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.stat{background:#f0f8ff;padding:8px 12px;border-radius:12px;font-size:14px}
+.container{max-width:1000px;margin:auto;padding:25px 15px 60px}h1,h2,h3{margin-top:0}.card{background:#fff;border-radius:20px;padding:25px;box-shadow:0 5px 20px rgba(0,0,0,.08);margin-bottom:20px}.center{text-align:center}
+.main-button{border:0;background:#2575fc;color:#fff;padding:14px 22px;border-radius:14px;font-size:17px;font-weight:bold;margin:6px;transition:.2s}.main-button:hover{transform:translateY(-2px)}
+.secondary-button{border:0;background:#edf3f8;color:#17324d;padding:12px 18px;border-radius:12px;font-size:16px;margin:5px}
+.level-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}.level-button{border:0;background:#fff;border-radius:18px;padding:20px;text-align:left;box-shadow:0 4px 15px rgba(0,0,0,.08);min-height:130px}
+.level-button.unlocked{border:3px solid #67aaf9}.level-button.completed{border:3px solid #52c788}.level-button.locked{opacity:.55;cursor:not-allowed}
+.level-number{font-size:13px;color:#6c7b88}.level-title{font-size:19px;font-weight:bold;margin:8px 0}.progress{width:100%;height:12px;background:#e7edf2;border-radius:20px;overflow:hidden;margin:15px 0}.progress-bar{height:100%;background:#52c788;width:0%;transition:.4s}
+.question{font-size:28px;font-weight:bold;margin:25px 0}.answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.answer{border:2px solid #d9e8f4;background:#fff;border-radius:15px;padding:16px;font-size:18px}.answer:hover{background:#f1f9ff}
+.feedback{margin-top:20px;padding:15px;border-radius:15px;font-size:17px;line-height:1.5}.correct{background:#e4faed;border:2px solid #75d6a0}.wrong{background:#fff0f0;border:2px solid #ff9999}
+.vocab-image{font-size:75px;margin:15px}.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:650px;margin:25px auto}
+.memory-card{min-height:110px;border:0;border-radius:18px;background:#2575fc;color:#fff;font-size:26px;font-weight:bold;box-shadow:0 4px 10px rgba(0,0,0,.12);transition:.2s}.memory-card:hover{transform:scale(1.03)}
+.memory-card.found{background:#52c788;cursor:default}.memory-card.open{background:#7c4dff}.memory-complete{display:none;text-align:center;background:#e8fff1;border:3px solid #52c788;border-radius:20px;padding:20px;margin-top:20px}
+.sentence-area{display:flex;flex-wrap:wrap;gap:10px;min-height:70px;padding:15px;border:3px dashed #bfd8ea;border-radius:15px;margin:20px 0}
+.word-button{border:0;background:#fff3b8;padding:12px 15px;border-radius:12px;font-size:17px;font-weight:bold}.word-button:hover{transform:translateY(-2px)}
+.explanation{margin-top:15px;padding:15px;background:#f5faff;border-radius:15px;line-height:1.6}.celebration{position:fixed;inset:0;background:rgba(255,255,255,.96);z-index:100;display:none;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.celebration.show{display:flex}.celebration-box{background:#fff;border-radius:25px;padding:40px 25px;max-width:600px;width:90%;box-shadow:0 10px 50px rgba(0,0,0,.15);position:relative;z-index:3}
+.garland{position:absolute;top:20px;left:0;right:0;font-size:35px;letter-spacing:10px;white-space:nowrap}.confetti{position:absolute;inset:0;pointer-events:none}.confetti-piece{position:absolute;top:-30px;font-size:25px;animation:fall 3s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}.hidden{display:none!important}.small{font-size:14px;color:#6c7b88}
+.install-banner{background:#fff3b8;border:2px solid #f0cf55;border-radius:16px;padding:15px;margin-bottom:20px;text-align:center}
+@media(max-width:650px){.memory-grid{grid-template-columns:repeat(2,1fr)}.memory-card{min-height:90px}.question{font-size:23px}.header-inner{flex-direction:column}.stats{justify-content:center}}
+</style>
+</head>
+<body>
+<header class="header"><div class="header-inner"><div class="logo">🇬🇧 English Fun Start</div><div class="stats">
+<div class="stat">⭐ Nivel <span id="statLevel">1</span></div><div class="stat">⚡ XP <span id="statXP">0</span></div>
+<div class="stat">🏆 Puntos <span id="statScore">0</span></div><div class="stat">🔥 Racha <span id="statStreak">0</span></div>
+</div></div></header>
+
+<main class="container">
+<section id="homeScreen">
+<div class="install-banner" id="installBanner" style="display:none">
+📱 Puedes instalar <strong>English Fun Start</strong> en este móvil.
+<br><button class="main-button" onclick="installApp()">➕ Instalar aplicación</button>
+</div>
+<div class="card center"><h1>🇬🇧 Aprende inglés jugando</h1><p>Aprende palabras y frases poco a poco, repitiendo lo necesario hasta que se te queden.</p><p>Cada nivel añade algo nuevo y repasa lo anterior.</p>
+<button class="main-button" onclick="showLevels()">🗺️ Ver niveles</button>
+<button class="secondary-button" onclick="startCurrentLevel()">▶️ Continuar aprendiendo</button></div>
+</section>
+
+<section id="levelsScreen" class="hidden"><div class="card"><h2>🗺️ Tus niveles</h2><p>Completa cada nivel para desbloquear el siguiente.</p><div class="level-grid" id="levelGrid"></div></div>
+<div class="center"><button class="secondary-button" onclick="showHome()">🏠 Inicio</button></div></section>
+
+<section id="gameScreen" class="hidden"><div class="card"><div id="gameContent"></div></div>
+<div class="center"><button class="secondary-button" onclick="showLevels()">🗺️ Niveles</button><button class="secondary-button" onclick="showHome()">🏠 Inicio</button></div></section>
+</main>
+
+<div id="celebration" class="celebration"><div class="garland">🎉 🔵 🟡 🟢 🔴 🟣 🟠 🎉</div><div id="confetti" class="confetti"></div>
+<div class="celebration-box"><div style="font-size:70px">🏆</div><h1 id="celebrationTitle">¡Nivel completado!</h1><p id="celebrationText"></p><button class="main-button" onclick="closeCelebration()">➡️ Continuar</button></div></div>
+
+<script>
+const levels=[
+{title:"Primeras palabras",vocab:[["hello","hola","👋"],["goodbye","adiós","👋"],["yes","sí","✅"],["no","no","❌"],["please","por favor","🙏"],["thanks","gracias","😊"],["book","libro","📕"],["cat","gato","🐱"]],sentences:[{words:["Hello","my","friend"],meaning:"Hola, mi amigo.",curiosity:"Hello es una de las formas más comunes de saludar en inglés."},{words:["Thank","you","very","much"],meaning:"Muchas gracias.",curiosity:"Thank you es una forma muy habitual de dar las gracias."}]},
+{title:"Colores",vocab:[["red","rojo","🔴"],["blue","azul","🔵"],["green","verde","🟢"],["yellow","amarillo","🟡"],["black","negro","⚫"],["white","blanco","⚪"],["pink","rosa","🩷"],["orange","naranja","🟠"]],sentences:[{words:["The","car","is","red"],meaning:"El coche es rojo.",curiosity:"The se utiliza para hablar de algo concreto."},{words:["My","book","is","blue"],meaning:"Mi libro es azul.",curiosity:"My significa 'mi' e indica posesión."}]},
+{title:"Números",vocab:[["one","uno","1️⃣"],["two","dos","2️⃣"],["three","tres","3️⃣"],["four","cuatro","4️⃣"],["five","cinco","5️⃣"],["six","seis","6️⃣"],["seven","siete","7️⃣"],["eight","ocho","8️⃣"]],sentences:[{words:["I","have","two","cats"],meaning:"Tengo dos gatos.",curiosity:"Have significa 'tener'."},{words:["I","see","three","dogs"],meaning:"Veo tres perros.",curiosity:"See significa 'ver'."}]},
+{title:"Personas",vocab:[["man","hombre","👨"],["woman","mujer","👩"],["boy","niño","👦"],["girl","niña","👧"],["friend","amigo","🧑‍🤝‍🧑"],["teacher","profesor","👨‍🏫"],["student","estudiante","🎓"],["baby","bebé","👶"]],sentences:[{words:["She","is","a","teacher"],meaning:"Ella es profesora.",curiosity:"She significa 'ella'."},{words:["He","is","my","friend"],meaning:"Él es mi amigo.",curiosity:"He significa 'él'."}]},
+{title:"Familia",vocab:[["mother","madre","👩"],["father","padre","👨"],["brother","hermano","👦"],["sister","hermana","👧"],["son","hijo","👦"],["daughter","hija","👧"],["family","familia","👨‍👩‍👧‍👦"],["grandma","abuela","👵"]],sentences:[{words:["My","family","is","big"],meaning:"Mi familia es grande.",curiosity:"Big significa 'grande'."},{words:["This","is","my","mother"],meaning:"Esta es mi madre.",curiosity:"This significa 'esto/esta'."}]},
+{title:"Acciones",vocab:[["run","correr","🏃"],["walk","caminar","🚶"],["eat","comer","🍽️"],["drink","beber","🥤"],["sleep","dormir","😴"],["read","leer","📖"],["write","escribir","✍️"],["play","jugar","🎮"]],sentences:[{words:["I","like","to","read"],meaning:"Me gusta leer.",curiosity:"Like significa 'gustar'."},{words:["I","play","every","day"],meaning:"Juego todos los días.",curiosity:"Every day significa 'todos los días'."}]},
+{title:"Comida",vocab:[["apple","manzana","🍎"],["banana","plátano","🍌"],["bread","pan","🍞"],["milk","leche","🥛"],["water","agua","💧"],["egg","huevo","🥚"],["cheese","queso","🧀"],["rice","arroz","🍚"]],sentences:[{words:["I","want","some","water"],meaning:"Quiero un poco de agua.",curiosity:"Want significa 'querer'."},{words:["I","eat","an","apple"],meaning:"Como una manzana.",curiosity:"An se usa delante de palabras que empiezan con sonido vocálico."}]},
+{title:"La casa",vocab:[["house","casa","🏠"],["door","puerta","🚪"],["window","ventana","🪟"],["room","habitación","🛏️"],["kitchen","cocina","🍳"],["bathroom","baño","🚿"],["bed","cama","🛏️"],["chair","silla","🪑"]],sentences:[{words:["This","is","my","house"],meaning:"Esta es mi casa.",curiosity:"House significa 'casa'."},{words:["The","door","is","open"],meaning:"La puerta está abierta.",curiosity:"Open significa 'abierto/a'."}]},
+{title:"Colegio",vocab:[["school","colegio","🏫"],["teacher","profesor","👩‍🏫"],["student","estudiante","🎓"],["book","libro","📚"],["pen","bolígrafo","🖊️"],["desk","pupitre","🪑"],["class","clase","🏫"],["lesson","lección","📖"]],sentences:[{words:["I","am","at","school"],meaning:"Estoy en el colegio.",curiosity:"I am significa 'yo soy/estoy'."},{words:["My","teacher","has","a","book"],meaning:"Mi profesor tiene un libro.",curiosity:"Has significa 'tiene' con he, she e it."}]},
+{title:"Animales",vocab:[["dog","perro","🐶"],["cat","gato","🐱"],["bird","pájaro","🐦"],["fish","pez","🐟"],["horse","caballo","🐴"],["cow","vaca","🐮"],["mouse","ratón","🐭"],["lion","león","🦁"]],sentences:[{words:["The","dog","is","big"],meaning:"El perro es grande.",curiosity:"Dog es una palabra muy frecuente en inglés."},{words:["I","like","my","cat"],meaning:"Me gusta mi gato.",curiosity:"Like puede significar 'gustar'."}]},
+{title:"Rutinas",vocab:[["morning","mañana","🌅"],["night","noche","🌙"],["breakfast","desayuno","🥣"],["school","colegio","🏫"],["work","trabajo","💼"],["home","casa","🏠"],["today","hoy","📅"],["every","cada","🔁"]],sentences:[{words:["I","eat","breakfast","every","morning"],meaning:"Desayuno todas las mañanas.",curiosity:"Morning significa 'mañana' como parte del día."},{words:["I","go","home","at","night"],meaning:"Voy a casa por la noche.",curiosity:"At se usa mucho para momentos concretos."}]},
+{title:"Tiempo",vocab:[["today","hoy","📅"],["tomorrow","mañana","➡️"],["yesterday","ayer","⬅️"],["morning","mañana","🌅"],["afternoon","tarde","☀️"],["evening","tarde-noche","🌆"],["night","noche","🌙"],["week","semana","📆"]],sentences:[{words:["Today","is","a","good","day"],meaning:"Hoy es un buen día.",curiosity:"Good significa 'bueno/a'."},{words:["See","you","tomorrow"],meaning:"Nos vemos mañana.",curiosity:"See you es una despedida muy habitual."}]},
+{title:"Preguntas",vocab:[["what","qué","❓"],["where","dónde","📍"],["who","quién","👤"],["when","cuándo","⏰"],["why","por qué","❓"],["how","cómo","🔧"],["name","nombre","🏷️"],["place","lugar","📍"]],sentences:[{words:["What","is","your","name"],meaning:"¿Cómo te llamas?",curiosity:"What is your name? equivale literalmente a '¿Cuál es tu nombre?'."},{words:["Where","do","you","live"],meaning:"¿Dónde vives?",curiosity:"Where significa 'dónde'."}]},
+{title:"Gustos",vocab:[["like","gustar","❤️"],["love","amar/encantar","😍"],["want","querer","🙋"],["food","comida","🍽️"],["music","música","🎵"],["game","juego","🎮"],["book","libro","📖"],["movie","película","🎬"]],sentences:[{words:["I","like","music"],meaning:"Me gusta la música.",curiosity:"I like... es una estructura básica para expresar gustos."},{words:["I","love","this","game"],meaning:"Me encanta este juego.",curiosity:"Love expresa un gusto más fuerte que like."}]},
+{title:"Presente simple",vocab:[["go","ir","➡️"],["come","venir","⬅️"],["live","vivir","🏠"],["work","trabajar","💼"],["study","estudiar","📚"],["play","jugar","🎮"],["eat","comer","🍴"],["drink","beber","🥤"]],sentences:[{words:["I","live","in","Spain"],meaning:"Vivo en España.",curiosity:"Live significa 'vivir'."},{words:["I","study","English","every","day"],meaning:"Estudio inglés todos los días.",curiosity:"Study significa 'estudiar'."}]},
+{title:"Negaciones",vocab:[["not","no","🚫"],["don't","no","❌"],["doesn't","no","❌"],["never","nunca","🚫"],["can't","no puedo","🙅"],["nothing","nada","⭕"],["no","ningún/no","❌"],["without","sin","🚫"]],sentences:[{words:["I","do","not","like","coffee"],meaning:"No me gusta el café.",curiosity:"Do not también puede aparecer como don't."},{words:["I","can't","swim"],meaning:"No puedo nadar.",curiosity:"Can't es la forma corta de cannot."}]},
+{title:"Presente continuo",vocab:[["running","corriendo","🏃"],["walking","caminando","🚶"],["eating","comiendo","🍴"],["drinking","bebiendo","🥤"],["reading","leyendo","📖"],["writing","escribiendo","✍️"],["playing","jugando","🎮"],["sleeping","durmiendo","😴"]],sentences:[{words:["I","am","reading","a","book"],meaning:"Estoy leyendo un libro.",curiosity:"Am + verbo en -ing forma el presente continuo con I."},{words:["She","is","eating","an","apple"],meaning:"Ella está comiendo una manzana.",curiosity:"Is + verbo-ing se usa con he, she e it."}]},
+{title:"Mezcla",vocab:[["happy","feliz","😊"],["sad","triste","😢"],["big","grande","🐘"],["small","pequeño","🐭"],["fast","rápido","⚡"],["slow","lento","🐢"],["hot","caliente","🔥"],["cold","frío","🥶"]],sentences:[{words:["The","dog","is","very","fast"],meaning:"El perro es muy rápido.",curiosity:"Very significa 'muy'."},{words:["The","water","is","cold"],meaning:"El agua está fría.",curiosity:"Cold significa 'frío/a'."}]},
+{title:"Frases cotidianas",vocab:[["hello","hola","👋"],["sorry","perdón","🙏"],["please","por favor","🙏"],["thanks","gracias","😊"],["welcome","bienvenido","🏠"],["help","ayuda","🆘"],["wait","esperar","⏳"],["come","venir","➡️"]],sentences:[{words:["Can","you","help","me"],meaning:"¿Puedes ayudarme?",curiosity:"Can se utiliza para hablar de posibilidad o pedir algo."},{words:["Thank","you","for","your","help"],meaning:"Gracias por tu ayuda.",curiosity:"For significa 'por/para' según el contexto."}]},
+{title:"Repaso general",vocab:[["friend","amigo","🧑‍🤝‍🧑"],["family","familia","👨‍👩‍👧‍👦"],["house","casa","🏠"],["school","colegio","🏫"],["food","comida","🍎"],["animal","animal","🐾"],["water","agua","💧"],["happy","feliz","😊"]],sentences:[{words:["I","am","happy","today"],meaning:"Estoy feliz hoy.",curiosity:"Today significa 'hoy'."},{words:["My","family","is","at","home"],meaning:"Mi familia está en casa.",curiosity:"At home es una expresión muy habitual que significa 'en casa'."}]}
+];
+
+let state=JSON.parse(localStorage.getItem("englishFunState"))||{currentLevel:0,xp:0,score:0,streak:0,completedLevels:[],stars:{},difficultWords:{}};
+let currentLevel=0,currentGame=0,currentQuestion=0,memoryCards=[],memoryFirst=null,memoryLocked=false,memoryCompleted=false,sentenceWords=[],sentenceSelected=[];
+
+function saveState(){localStorage.setItem("englishFunState",JSON.stringify(state));updateStats()}
+function updateStats(){statLevel.innerText=state.currentLevel+1;statXP.innerText=state.xp;statScore.innerText=state.score;statStreak.innerText=state.streak}
+function hideAllScreens(){homeScreen.classList.add("hidden");levelsScreen.classList.add("hidden");gameScreen.classList.add("hidden")}
+function showHome(){hideAllScreens();homeScreen.classList.remove("hidden");updateStats()}
+function showLevels(){hideAllScreens();levelsScreen.classList.remove("hidden");renderLevels()}
+function startCurrentLevel(){startLevel(state.currentLevel)}
+function renderLevels(){
+ levelGrid.innerHTML="";
+ levels.forEach((level,index)=>{
+  const unlocked=index===0||state.completedLevels.includes(index-1),completed=state.completedLevels.includes(index);
+  const b=document.createElement("button");b.className="level-button "+(unlocked?"unlocked ":"locked ")+(completed?"completed":"");b.disabled=!unlocked;
+  b.innerHTML=`<div class="level-number">NIVEL ${index+1}</div><div class="level-title">${completed?"✅ ":""}${!unlocked?"🔒 ":""}${level.title}</div><div class="small">${completed?"Nivel completado":unlocked?"Pulsa para empezar":"Completa el nivel anterior"}</div>`;
+  if(unlocked)b.onclick=()=>startLevel(index);levelGrid.appendChild(b);
+ });
+}
+function startLevel(index){
+ if(index>0&&!state.completedLevels.includes(index-1)){alert("🔒 Primero completa el nivel anterior.");return}
+ currentLevel=index;state.currentLevel=index;currentGame=0;currentQuestion=0;memoryFirst=null;memoryLocked=false;memoryCompleted=false;sentenceSelected=[];saveState();hideAllScreens();gameScreen.classList.remove("hidden");nextGame()
+}
+function nextGame(){gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else completeLevel()}
+function gameHeader(title,text){return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/4*100)}%"></div></div></div>`}
+function showVocabularyGame(){
+ const level=levels[currentLevel],item=level.vocab[currentQuestion%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
+ gameContent.innerHTML=`${gameHeader("🖼️ Encuentra la palabra","Mira la imagen y elige la palabra correcta.")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Qué palabra es?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerVocabulary('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="vocabFeedback"></div></div>`
+}
+function answerVocabulary(a,c){if(a===c){state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},700)}else{state.streak=0;vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.</div>`;saveState()}}
+function showMemoryGame(){
+ const selected=shuffle(levels[currentLevel].vocab).slice(0,4);memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryCards=[];
+ selected.forEach(i=>{memoryCards.push({word:i[0],value:i[2]});memoryCards.push({word:i[0],value:i[0]})});memoryCards=shuffle(memoryCards);
+ let h=`${gameHeader("🧠 Encuentra las parejas","Encuentra cada imagen con su palabra.")}<div class="memory-grid">`;
+ memoryCards.forEach((c,i)=>h+=`<button id="memory-${i}" class="memory-card" data-word="${esc(c.word)}" data-value="${esc(c.value)}" data-open="false" onclick="flipMemory(${i})">❓</button>`);
+ h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>¡Muy bien! Has relacionado las imágenes con las palabras.</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
+ gameContent.innerHTML=h
+}
+function flipMemory(index){
+ if(memoryLocked||memoryCompleted)return;const card=document.getElementById("memory-"+index);if(!card||card.classList.contains("found")||card.dataset.open==="true")return;
+ card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value;
+ if(!memoryFirst){memoryFirst=card;return}
+ if(memoryFirst.dataset.word===card.dataset.word){
+  memoryFirst.classList.add("found");card.classList.add("found");memoryFirst.classList.remove("open");card.classList.remove("open");memoryFirst.dataset.open="false";card.dataset.open="false";memoryFirst=null;
+  state.xp+=20;state.score+=20;state.streak++;saveState();checkMemoryComplete()
+ }else{
+  memoryLocked=true;state.streak=0;saveState();const first=memoryFirst;setTimeout(()=>{first.dataset.open="false";first.classList.remove("open");first.innerText="❓";card.dataset.open="false";card.classList.remove("open");card.innerText="❓";memoryFirst=null;memoryLocked=false},850)
+ }
+}
+function checkMemoryComplete(){
+ if(memoryCompleted)return;const cards=document.querySelectorAll(".memory-card"),found=document.querySelectorAll(".memory-card.found");
+ if(cards.length&&found.length===cards.length){memoryCompleted=true;memoryLocked=true;memoryMessage.innerHTML=`<div class="feedback correct">🎉 ¡Perfecto! Has encontrado todas las parejas.</div>`;memoryComplete.style.display="block"}
+}
+function finishMemoryGame(){if(!memoryCompleted)return;currentGame++;currentQuestion=0;memoryFirst=null;memoryLocked=false;nextGame()}
+function showQuizGame(){
+ const level=levels[currentLevel],item=level.vocab[(currentQuestion+3)%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
+ gameContent.innerHTML=`${gameHeader("❓ Quiz","¿Recuerdas esta palabra?")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Cómo se dice <strong>${item[1]}</strong> en inglés?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerQuiz('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="quizFeedback"></div></div>`
+}
+function answerQuiz(a,c){if(a===c){state.xp+=15;state.score+=15;state.streak++;quizFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showQuizGame()},700)}else{state.streak=0;quizFeedback.innerHTML=`<div class="feedback wrong">❌ No pasa nada.<br>La respuesta correcta era: <strong>${c}</strong>.</div>`;saveState()}}
+function showSentenceGame(){
+ const s=levels[currentLevel].sentences[currentQuestion%levels[currentLevel].sentences.length];sentenceWords=shuffle(s.words.map((word,id)=>({id,word})));sentenceSelected=[];
+ gameContent.innerHTML=`${gameHeader("🧩 Construye la frase","Las palabras están desordenadas. Pulsa en ellas para formar la frase.")}<div class="center"><div class="question">💬 Ordena la frase</div><div id="sentenceArea" class="sentence-area"><span class="small">Pulsa las palabras de abajo...</span></div><div id="sentenceOptions" class="answers">${sentenceWords.map(i=>`<button id="word-${i.id}" class="word-button" onclick="selectSentenceWord(${i.id})">${i.word}</button>`).join("")}</div><br><button class="main-button" onclick="checkSentence()">✅ Comprobar</button><div id="sentenceFeedback"></div></div>`
+}
+function selectSentenceWord(id){const item=sentenceWords.find(x=>x.id===id);if(!item||sentenceSelected.some(x=>x.id===id))return;sentenceSelected.push(item);const b=document.getElementById("word-"+id);if(b){b.disabled=true;b.style.opacity=".45"}renderSentenceArea()}
+function renderSentenceArea(){sentenceArea.innerHTML=sentenceSelected.length?sentenceSelected.map(i=>`<button class="word-button" onclick="removeSentenceWord(${i.id})">${i.word}</button>`).join(""):`<span class="small">Pulsa las palabras de abajo...</span>`}
+function removeSentenceWord(id){sentenceSelected=sentenceSelected.filter(x=>x.id!==id);const b=document.getElementById("word-"+id);if(b){b.disabled=false;b.style.opacity="1"}renderSentenceArea()}
+function checkSentence(){
+ const s=levels[currentLevel].sentences[currentQuestion%levels[currentLevel].sentences.length],user=sentenceSelected.map(x=>x.word).join(" "),correct=s.words.join(" ");
+ if(user.toLowerCase()===correct.toLowerCase()){state.xp+=30;state.score+=30;state.streak++;sentenceFeedback.innerHTML=`<div class="feedback correct">🎉 <strong>¡Perfecto!</strong><div class="explanation"><strong>🇪🇸 Significado:</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=levels[currentLevel].sentences.length){currentQuestion=0;currentGame++;nextGame()}else showSentenceGame()},1700)}
+ else{state.streak=0;sentenceFeedback.innerHTML=`<div class="feedback wrong">❌ <strong>Todavía no.</strong><div class="explanation"><strong>Lo que has escrito:</strong><br>${user||"(nada)"}<br><br><strong>✅ La frase correcta:</strong><br>${correct}<br><br><strong>🇪🇸 ¿Qué significa?</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState()}
+}
+function completeLevel(){if(state.completedLevels.includes(currentLevel)){showLevels();return}state.completedLevels.push(currentLevel);state.xp+=100;state.score+=100;state.streak++;state.stars[currentLevel]=3;if(currentLevel+1<levels.length)state.currentLevel=currentLevel+1;saveState();showCelebration()}
+function showCelebration(){
+ const next=currentLevel+1;
+ if(next<levels.length){celebrationTitle.innerText="🎉 ¡Nivel completado!";celebrationText.innerHTML=`Has terminado <strong>Nivel ${currentLevel+1}</strong>.<br><br>🔓 ¡El nivel ${next+1} está desbloqueado!<br><br>⭐ +100 XP`}
+ else{celebrationTitle.innerText="🏆 ¡Has completado los 20 niveles!";celebrationText.innerHTML=`¡Enhorabuena!<br><br>Has terminado todo el recorrido inicial de English Fun Start.<br><br>🇬🇧 ¡Ya tienes una muy buena base!`}
+ createConfetti();celebration.classList.add("show")
+}
+function closeCelebration(){celebration.classList.remove("show");if(currentLevel+1<levels.length)startLevel(currentLevel+1);else showLevels()}
+function createConfetti(){confetti.innerHTML="";const p=["🎉","⭐","🎊","🔵","🟡","🟢","🔴","🟣","🟠","✨"];for(let i=0;i<80;i++){const e=document.createElement("div");e.className="confetti-piece";e.innerText=p[Math.floor(Math.random()*p.length)];e.style.left=Math.random()*100+"%";e.style.animationDelay=Math.random()*2+"s";e.style.fontSize=15+Math.random()*20+"px";confetti.appendChild(e)}}
+function shuffle(a){const c=[...a];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]]}return c}
+function getSpanish(w){for(const l of levels){const i=l.vocab.find(x=>x[0]===w);if(i)return i[1]}return""}
+function esc(t){return String(t).replace(/\\/g,"\\\\").replace(/'/g,"\\'")}
+
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstallPrompt=e;installBanner.style.display="block"});
+async function installApp(){if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installBanner.style.display="none"}
+window.addEventListener("appinstalled",()=>{installBanner.style.display="none"});
+
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+updateStats();showHome();
+</script>
+</body>
+</html>
