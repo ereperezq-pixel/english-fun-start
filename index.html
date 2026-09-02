@@ -164,8 +164,8 @@ const levels=[
 {title:"Repaso general",vocab:[["friend","amigo","🧑‍🤝‍🧑"],["family","familia","👨‍👩‍👧‍👦"],["house","casa","🏠"],["school","colegio","🏫"],["food","comida","🍎"],["animal","animal","🐾"],["water","agua","💧"],["happy","feliz","😊"]],sentences:[{words:["I","am","happy","today"],meaning:"Estoy feliz hoy.",curiosity:"Today significa 'hoy'."},{words:["My","family","is","at","home"],meaning:"Mi familia está en casa.",curiosity:"At home es una expresión muy habitual que significa 'en casa'."}]}
 ];
 
-// Niveles publicados actualmente. Para añadir más contenido en el futuro, aumenta este número.
-const PUBLISHED_LEVELS = 2;
+// Los 20 niveles están publicados y se desbloquean uno a uno al completar el anterior.
+const PUBLISHED_LEVELS = 20;
 
 let state=JSON.parse(localStorage.getItem("englishFunState"))||{currentLevel:0,xp:0,score:0,streak:0,completedLevels:[],stars:{},difficultWords:{}};
 let currentLevel=0,currentGame=0,currentQuestion=0,memoryCards=[],memoryFirst=null,memoryLocked=false,memoryCompleted=false,sentenceWords=[],sentenceSelected=[];
