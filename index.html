@@ -487,13 +487,13 @@ if(!Array.isArray(state.unlockedLevelsA2)) state.unlockedLevelsA2=[0];
 if(!Array.isArray(state.unlockedLevelsB1)) state.unlockedLevelsB1=[0];
 if(!Array.isArray(state.completedLevels)) state.completedLevels=[];
 state.completedLevels=state.completedLevels.map(x=>typeof x==="number"?`A1-${x}`:x);
-const APP_VERSION="1.2.0";
+const APP_VERSION="1.3.0";
 function showUpdateNotice(){
   if(localStorage.getItem("englishFunLastSeenVersion")===APP_VERSION) return;
   const el=document.createElement("div");
   el.id="updateNotice";
   el.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999";
-  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías? con explicación y traducción<br>🎭 Preparación para nuevas situaciones reales<br>🔊 Mejoras de audio y aprendizaje<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
+  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías?\n🧠 4 segundos para aprender el significado en “¿Qué palabra es?” con explicación y traducción<br>🎭 Preparación para nuevas situaciones reales<br>🔊 Mejoras de audio y aprendizaje<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
   document.body.appendChild(el);
 }
 function closeUpdateNotice(){localStorage.setItem("englishFunLastSeenVersion",APP_VERSION);document.getElementById("updateNotice")?.remove()}
@@ -621,13 +621,13 @@ function showVocabularyGame(){
 
  renderSpeech(); setTimeout(()=>speakEnglish(levels[currentLevel].vocab[currentQuestion%levels[currentLevel].vocab.length][0]),350);
 }
-function answerVocabulary(a,c){if(a===c){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},700)}else{state.streak=0;vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.</div>`;saveState()}}
+function answerVocabulary(a,c){if(document.querySelectorAll("#gameContent .answer:disabled").length)return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=a===c;if(ok){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para leerlo y escucharlo.</span></div>`}else{state.streak=0;speakEnglish(c);vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para aprenderla.</span></div>`}saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},4000)}
 function showMemoryGame(){
  const selected=shuffle(levels[currentLevel].vocab).slice(0,4);memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryMistakes=0;memoryCards=[];
- selected.forEach(i=>{memoryCards.push({word:i[0],value:i[2]});memoryCards.push({word:i[0],value:i[0]})});memoryCards=shuffle(memoryCards);
- let h=`${gameHeader("🧠 Encuentra las parejas","Encuentra cada imagen con su palabra.")}<div class="memory-grid">`;
- memoryCards.forEach((c,i)=>h+=`<button id="memory-${i}" class="memory-card" data-word="${esc(c.word)}" data-value="${esc(c.value)}" data-open="false" onclick="flipMemory(${i})">❓</button>`);
- h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>¡Muy bien! Has relacionado las imágenes con las palabras.</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
+ selected.forEach(i=>{memoryCards.push({word:i[0],value:i[0],type:"english"});memoryCards.push({word:i[0],value:i[1],type:"spanish"})});memoryCards=shuffle(memoryCards);
+ let h=`${gameHeader("🧠 Encuentra las parejas","Relaciona cada palabra en inglés con su significado en español.")}<div class="memory-grid">`;
+ memoryCards.forEach((c,i)=>h+=`<button id="memory-${i}" class="memory-card" data-word="${esc(c.word)}" data-value="${esc(c.value)}" data-type="${c.type}" data-open="false" onclick="flipMemory(${i})">❓</button>`);
+ h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>¡Muy bien! Has relacionado las palabras en inglés con sus significados en español.</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
  gameContent.innerHTML=h
 
  renderSpeech();
