@@ -589,10 +589,42 @@ function showSentenceGame(){
 function selectSentenceWord(id){const item=sentenceWords.find(x=>x.id===id);if(!item||sentenceSelected.some(x=>x.id===id))return;sentenceSelected.push(item);const b=document.getElementById("word-"+id);if(b){b.disabled=true;b.style.opacity=".45"}renderSentenceArea()}
 function renderSentenceArea(){sentenceArea.innerHTML=sentenceSelected.length?sentenceSelected.map(i=>`<button class="word-button" onclick="removeSentenceWord(${i.id})">${i.word}</button>`).join(""):`<span class="small">Pulsa las palabras de abajo...</span>`}
 function removeSentenceWord(id){sentenceSelected=sentenceSelected.filter(x=>x.id!==id);const b=document.getElementById("word-"+id);if(b){b.disabled=false;b.style.opacity="1"}renderSentenceArea()}
+function sentenceExtra(s){
+ const text=(s.words||[]).join(" ").toLowerCase();
+ let usage="Esta frase es útil para practicar inglés en una situación cotidiana.";
+ let alternatives=[]; let phrasal="";
+ if(/get up/.test(text)){usage="Se usa para hablar de la hora o rutina a la que alguien se levanta.";phrasal="get up = levantarse";}
+ else if(/find out/.test(text)){usage="Se usa cuando quieres descubrir o averiguar una información que no conocías.";phrasal="find out = averiguar / descubrir";alternatives=["discover = descubrir"];}
+ else if(/look for/.test(text)){usage="Se usa cuando estás intentando encontrar una persona o cosa.";phrasal="look for = buscar";alternatives=["search for = buscar"];}
+ else if(/look after/.test(text)){usage="Se usa cuando alguien se encarga de cuidar a una persona, animal o cosa.";phrasal="look after = cuidar / encargarse de";}
+ else if(/carry on/.test(text)){usage="Se usa para indicar que una acción continúa.";phrasal="carry on = continuar / seguir";alternatives=["continue = continuar"];}
+ else if(/pick up/.test(text)){usage="Según el contexto puede significar recoger algo o pasar a buscar a alguien.";phrasal="pick up = recoger / pasar a buscar";}
+ else if(/turn on/.test(text)){usage="Se utiliza para encender aparatos, luces o dispositivos.";phrasal="turn on = encender";}
+ else if(/turn off/.test(text)){usage="Se utiliza para apagar aparatos, luces o dispositivos.";phrasal="turn off = apagar";}
+ else if(/give up/.test(text)){usage="Se usa cuando alguien deja de intentar algo o abandona.";phrasal="give up = rendirse / dejar de intentar";}
+ else if(/should/.test(text)){usage="Should se utiliza principalmente para dar consejos o recomendaciones.";alternatives=["ought to = deberías / convendría"];}
+ else if(/must/.test(text)){usage="Must expresa una obligación o necesidad fuerte.";alternatives=["have to = tener que"];}
+ else if(/might/.test(text)){usage="Might expresa una posibilidad.";alternatives=["may = puede que / quizá"];}
+ else if(/because/.test(text)){usage="Because introduce la razón o causa de algo.";alternatives=["since = ya que", "as = ya que"];}
+ else if(/although/.test(text)){usage="Although introduce un contraste: algo ocurre a pesar de otra circunstancia.";alternatives=["even though = aunque / a pesar de que"];}
+ return {usage,alternatives,phrasal};
+}
+function sentenceResultHTML(s,correct,ok,user){
+ const extra=sentenceExtra(s);
+ return `<div class="feedback ${ok?'correct':'wrong'}"><strong>${ok?'🎉 ¡Perfecto!':'❌ Todavía no.'}</strong><div class="explanation">${!ok?`<strong>Lo que has escrito:</strong><br>${user||'(nada)'}<br><br>`:''}<strong>🇬🇧 Frase correcta:</strong><br><span style="font-size:1.15em">${correct}</span><br><br><strong>🇪🇸 Significado:</strong><br>${s.meaning}<br><br><strong>💡 Cómo se usa:</strong><br>${extra.usage}${extra.phrasal?`<br><br><strong>🔗 Phrasal verb:</strong><br>${extra.phrasal}`:''}${extra.alternatives.length?`<br><br><strong>🔄 Otras formas parecidas:</strong><br>${extra.alternatives.join('<br>')}`:''}<br><br><strong>📌 Nota:</strong><br>${s.curiosity}</div><button class="main-button" onclick="acceptSentenceResult()">➡️ ACEPTAR Y CONTINUAR</button></div>`;
+}
+function acceptSentenceResult(){
+ currentQuestion++;
+ if(currentQuestion>=levels[currentLevel].sentences.length){currentQuestion=0;currentGame++;nextGame();}
+ else showSentenceGame();
+}
 function checkSentence(){
  const s=levels[currentLevel].sentences[currentQuestion%levels[currentLevel].sentences.length],user=sentenceSelected.map(x=>x.word).join(" "),correct=s.words.join(" ");
- if(user.toLowerCase()===correct.toLowerCase()){speakEnglish(correct);state.xp+=30;state.score+=30;state.streak++;sentenceFeedback.innerHTML=`<div class="feedback correct">🎉 <strong>¡Perfecto!</strong><div class="explanation"><strong>🇪🇸 Significado:</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=levels[currentLevel].sentences.length){currentQuestion=0;currentGame++;nextGame()}else showSentenceGame()},1700)}
- else{speakEnglish(correct);state.streak=0;sentenceFeedback.innerHTML=`<div class="feedback wrong">❌ <strong>Todavía no.</strong><div class="explanation"><strong>Lo que has escrito:</strong><br>${user||"(nada)"}<br><br><strong>✅ La frase correcta:</strong><br>${correct}<br><br><strong>🇪🇸 ¿Qué significa?</strong><br>${s.meaning}<br><br><strong>💡 Curiosidad:</strong><br>${s.curiosity}</div></div>`;saveState()}
+ if(document.getElementById("sentenceResultLock"))return;
+ const ok=user.toLowerCase()===correct.toLowerCase();
+ if(ok){speakEnglish(correct);state.xp+=30;state.score+=30;state.streak++;saveState();}
+ else{speakEnglish(correct);state.streak=0;saveState();}
+ sentenceFeedback.innerHTML=`<span id="sentenceResultLock" style="display:none"></span>`+sentenceResultHTML(s,correct,ok,user);
 }
 function showListeningGame(){const level=levels[currentLevel],q=level.sentences[currentQuestion%level.sentences.length],english=q.words.join(" "),pool=level.sentences.filter(x=>x!==q).map(x=>x.meaning),options=shuffle([q.meaning,...shuffle(pool).slice(0,3)]);gameContent.innerHTML=`${gameHeader("🎧 Escucha y elige","Escucha la frase en inglés y elige su significado.")}<div class="listen-box"><div class="course-badge">🎧 Comprensión auditiva</div><div class="listen-word">🔊</div><button class="speech-button" onclick="speakEnglish('${esc(english)}')">🔊 ESCUCHAR DE NUEVO</button><div class="small">Puedes escucharla tantas veces como quieras.</div></div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerListening('${esc(o)}','${esc(q.meaning)}','${esc(english)}')">${o}</button>`).join("")}</div><div id="listeningFeedback"></div>`;setTimeout(()=>speakEnglish(english),250)}
 function answerListening(answer,correct,english){document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);if(answer===correct){state.xp+=20;state.score+=20;state.streak++;speakEnglish(english);listeningFeedback.innerHTML=`<div class="feedback correct">🎧 ¡Muy bien! Has entendido la frase.<br><strong>${english}</strong></div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showListeningGame()},1000)}else{state.streak=0;speakEnglish(english);listeningFeedback.innerHTML=`<div class="feedback wrong">❌ La respuesta correcta era:<br><strong>${correct}</strong><br><br>Puedes escucharla otra vez.</div>`;saveState();setTimeout(()=>showListeningGame(),1200)}}
