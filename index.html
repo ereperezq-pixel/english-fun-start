@@ -704,7 +704,7 @@ window.addEventListener("appinstalled",()=>{installBanner.style.display="none"})
 
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 updateStats();showHome();
+window.addEventListener("load",()=>setTimeout(showUpdateNotice,350));
 </script>
 </body>
 </html>
-window.addEventListener("load",()=>setTimeout(showUpdateNotice,350));
