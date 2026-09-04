@@ -622,6 +622,22 @@ function showVocabularyGame(){
  renderSpeech(); setTimeout(()=>speakEnglish(levels[currentLevel].vocab[currentQuestion%levels[currentLevel].vocab.length][0]),350);
 }
 function answerVocabulary(a,c){if(document.querySelectorAll("#gameContent .answer:disabled").length)return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=a===c;if(ok){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para leerlo y escucharlo.</span></div>`}else{state.streak=0;speakEnglish(c);vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para aprenderla.</span></div>`}saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},4000)}
+
+function speakMemoryCard(text, lang){
+  if(!state.voice) return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(String(text));
+    u.lang=(lang==="es")?"es-ES":"en-GB";
+    u.rate=0.78;
+    const voices=speechSynthesis.getVoices();
+    const v=voices.find(x=>(lang==="es"?/^es/i.test(x.lang):/^en-GB/i.test(x.lang)))
+      || voices.find(x=>(lang==="es"?/^es/i.test(x.lang):/^en/i.test(x.lang)));
+    if(v) u.voice=v;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
 function showMemoryGame(){
  const selected=shuffle(levels[currentLevel].vocab).slice(0,4);memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryMistakes=0;memoryCards=[];
  selected.forEach(i=>{memoryCards.push({word:i[0],value:i[0],type:"english"});memoryCards.push({word:i[0],value:i[1],type:"spanish"})});memoryCards=shuffle(memoryCards);
