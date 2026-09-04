@@ -487,7 +487,7 @@ if(!Array.isArray(state.unlockedLevelsA2)) state.unlockedLevelsA2=[0];
 if(!Array.isArray(state.unlockedLevelsB1)) state.unlockedLevelsB1=[0];
 if(!Array.isArray(state.completedLevels)) state.completedLevels=[];
 state.completedLevels=state.completedLevels.map(x=>typeof x==="number"?`A1-${x}`:x);
-const APP_VERSION="1.3.1";
+const APP_VERSION="1.4.0";
 function showUpdateNotice(){
   if(localStorage.getItem("englishFunLastSeenVersion")===APP_VERSION) return;
   const el=document.createElement("div");
@@ -624,18 +624,13 @@ function showVocabularyGame(){
 function answerVocabulary(a,c){if(document.querySelectorAll("#gameContent .answer:disabled").length)return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=a===c;if(ok){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para leerlo y escucharlo.</span></div>`}else{state.streak=0;speakEnglish(c);vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para aprenderla.</span></div>`}saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},4000)}
 
 function speakMemoryCard(text, lang){
-  if(!state.voice)return;
-  try{
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(String(text));
-    u.lang=lang==="es"?"es-ES":"en-GB";
-    u.rate=0.78;
-    const voices=speechSynthesis.getVoices();
-    const voice=voices.find(v=>lang==="es"?/^es-ES/i.test(v.lang):/^en-GB/i.test(v.lang))
-      || voices.find(v=>lang==="es"?/^es/i.test(v.lang):/^en/i.test(v.lang));
-    if(voice)u.voice=voice;
-    speechSynthesis.speak(u);
-  }catch(e){}
+  if(!speechEnabled || !text || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  if(lang==="es"){
+    speakSpanish(text);
+  }else{
+    speakEnglish(text);
+  }
 }
 
 function showMemoryGame(){
