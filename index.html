@@ -487,13 +487,13 @@ if(!Array.isArray(state.unlockedLevelsA2)) state.unlockedLevelsA2=[0];
 if(!Array.isArray(state.unlockedLevelsB1)) state.unlockedLevelsB1=[0];
 if(!Array.isArray(state.completedLevels)) state.completedLevels=[];
 state.completedLevels=state.completedLevels.map(x=>typeof x==="number"?`A1-${x}`:x);
-const APP_VERSION="1.1.0";
+const APP_VERSION="1.2.0";
 function showUpdateNotice(){
   if(localStorage.getItem("englishFunLastSeenVersion")===APP_VERSION) return;
   const el=document.createElement("div");
   el.id="updateNotice";
   el.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999";
-  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías?<br>🎭 Preparación para nuevas situaciones reales<br>🔊 Mejoras de audio y aprendizaje<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
+  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías? con explicación y traducción<br>🎭 Preparación para nuevas situaciones reales<br>🔊 Mejoras de audio y aprendizaje<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
   document.body.appendChild(el);
 }
 function closeUpdateNotice(){localStorage.setItem("englishFunLastSeenVersion",APP_VERSION);document.getElementById("updateNotice")?.remove()}
@@ -582,23 +582,37 @@ B1:[
 ]};
 let responseQuestionIndex=0;
 function getResponseQuestions(){const pool=responseGameData[activeCourse]||responseGameData.A1;return shuffle(pool).slice(0,4)}
-function showResponseGame(){
- const qs=getResponseQuestions(); responseQuestionIndex=0; window.responseQuestions=qs;
- renderResponseQuestion();
-}
-function renderResponseQuestion(){
- const q=window.responseQuestions[responseQuestionIndex];
- gameContent.innerHTML=`${gameHeader("💬 ¿Qué responderías?","Lee la situación y elige la respuesta más natural.")}<div class="center"><div class="course-badge">🗣️ Inglés para conversar</div><div class="question"><strong>Alguien te dice:</strong><br><span style="font-size:1.2em">“${q.q}”</span></div><div class="answers">${shuffle(q.o).map(o=>`<button class="answer" onclick="answerResponse('${esc(o)}','${esc(q.a)}')">${o}</button>`).join("")}</div><div id="responseFeedback"></div></div>`;
- setTimeout(()=>speakEnglish(q.q),200);
-}
-function answerResponse(answer,correct){
- document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);
- const ok=answer===correct;
- if(ok){state.xp+=20;state.score+=20;state.streak++;speakEnglish(correct);responseFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Muy bien!<br><strong>${correct}</strong><br><br>💡 Esta es una respuesta natural para esta situación.</div>`;}
- else{state.streak=0;speakEnglish(correct);responseFeedback.innerHTML=`<div class="feedback wrong">❌ No encaja en esta situación.<br><br>La mejor respuesta es:<br><strong>${correct}</strong></div>`;}
- saveState();
- setTimeout(()=>{responseQuestionIndex++;if(responseQuestionIndex<window.responseQuestions.length)renderResponseQuestion();else{currentQuestion=0;currentGame++;nextGame()}},ok?1200:1700);
-}
+function showResponseGame(){const qs=getResponseQuestions();responseQuestionIndex=0;window.responseQuestions=qs;renderResponseQuestion()}
+function responseExtra(q){const data={
+"What’s your name?":{"qm":"¿Cómo te llamas?","am":"Me llamo Anna.","why":"Es una forma natural y muy habitual de responder cuando alguien pregunta tu nombre."},
+"How are you?":{"qm":"¿Cómo estás?","am":"Estoy bien, gracias.","why":"Es una respuesta habitual para decir cómo te encuentras."},
+"Where are you from?":{"qm":"¿De dónde eres?","am":"Soy de España.","why":"Se usa para indicar tu país o lugar de origen."},
+"Where do you live?":{"qm":"¿Dónde vives?","am":"Vivo en España.","why":"Se utiliza para decir dónde resides."},
+"What time do you get up?":{"qm":"¿A qué hora te levantas?","am":"Me levanto a las siete.","why":"La estructura “I get up at…” sirve para hablar de la hora a la que te levantas."},
+"Would you like some water?":{"qm":"¿Quieres un poco de agua?","am":"Sí, por favor.","why":"“Yes, please” es una respuesta educada para aceptar una oferta."},
+"What do you like?":{"qm":"¿Qué te gusta?","am":"Me gusta la pizza.","why":"“I like…” se usa para expresar gustos y preferencias."},
+"What are you doing?":{"qm":"¿Qué estás haciendo?","am":"Estoy desayunando.","why":"El presente continuo “I’m …-ing” se usa para hablar de lo que estás haciendo ahora."},
+"What do you usually do at the weekend?":{"qm":"¿Qué sueles hacer el fin de semana?","am":"Normalmente quedo con mis amigos.","why":"“I usually…” sirve para hablar de hábitos y rutinas."},
+"How often do you exercise?":{"qm":"¿Con qué frecuencia haces ejercicio?","am":"Hago ejercicio tres veces por semana.","why":"“Three times a week” indica frecuencia."},
+"Could I have the menu, please?":{"qm":"¿Podría traerme el menú, por favor?","am":"Claro. Aquí tiene.","why":"“Of course. Here you are.” es una respuesta educada al entregar algo."},
+"What did you do yesterday?":{"qm":"¿Qué hiciste ayer?","am":"Fui al cine.","why":"“I went…” usa el pasado de “go” para hablar de una acción terminada."},
+"What are you going to do tomorrow?":{"qm":"¿Qué vas a hacer mañana?","am":"Voy a visitar a mi familia.","why":"“Be going to” se usa para hablar de planes o intenciones."},
+"Which one would you choose?":{"qm":"¿Cuál elegirías?","am":"Elegiría el más barato.","why":"“I’d choose…” es una forma natural de expresar una elección o preferencia."},
+"What should I do if I feel ill?":{"qm":"¿Qué debería hacer si me encuentro mal?","am":"Deberías ver a un médico.","why":"“You should…” se usa para dar consejos."},
+"Excuse me, where is the station?":{"qm":"Perdone, ¿dónde está la estación?","am":"Está al lado del banco.","why":"“It’s next to…” sirve para indicar la ubicación de un lugar."},
+"I’m sorry, I’m going to be late.":{"qm":"Lo siento, voy a llegar tarde.","am":"No te preocupes. Tómate tu tiempo.","why":"“Don’t worry” tranquiliza a la otra persona y “Take your time” significa que no tiene que darse prisa."},
+"What do you think about the new project?":{"qm":"¿Qué opinas del nuevo proyecto?","am":"Creo que es una buena idea, pero necesitamos más tiempo.","why":"Es una respuesta natural para dar una opinión y añadir un matiz o contraste."},
+"Could you help me with this problem?":{"qm":"¿Podrías ayudarme con este problema?","am":"Claro. Vamos a echarle un vistazo.","why":"“Sure” acepta la petición y “Let’s have a look” propone buscar una solución juntos."},
+"Why don’t we take the train instead?":{"qm":"¿Por qué no cogemos el tren en su lugar?","am":"Me parece una buena idea.","why":"“That sounds like a good idea” es una forma natural de aceptar una propuesta."},
+"Have you ever been to London?":{"qm":"¿Has estado alguna vez en Londres?","am":"Sí, he estado allí dos veces.","why":"El presente perfecto “Have you ever…?” pregunta por experiencias en la vida."},
+"What should we do about the delay?":{"qm":"¿Qué deberíamos hacer con el retraso?","am":"Deberíamos contactar con la compañía aérea.","why":"“We should…” sirve para proponer una solución o dar una recomendación."},
+"Why are you learning English?":{"qm":"¿Por qué estás aprendiendo inglés?","am":"Lo necesito para el trabajo y para viajar.","why":"“I need it for…” explica la finalidad o el motivo de aprender algo."},
+"What would you do if you had more free time?":{"qm":"¿Qué harías si tuvieras más tiempo libre?","am":"Viajaría más y aprendería cosas nuevas.","why":"“I’d…” es la forma corta de “I would” y se usa para situaciones hipotéticas."}
+};return data[q.q]||{qm:"¿Qué significa esta pregunta?",am:"Esta es la respuesta adecuada.",why:"Esta respuesta encaja de forma natural con la situación."}}
+function renderResponseQuestion(){const q=window.responseQuestions[responseQuestionIndex];gameContent.innerHTML=`${gameHeader("💬 ¿Qué responderías?","Lee la situación y elige la respuesta más natural.")}<div class="center"><div class="course-badge">🗣️ Inglés para conversar</div><div class="question"><strong>Alguien te dice:</strong><br><span style="font-size:1.2em">“${q.q}”</span></div><div class="answers">${shuffle(q.o).map(o=>`<button class="answer" onclick="answerResponse('${esc(o)}','${esc(q.a)}','${esc(q.q)}')">${o}</button>`).join("")}</div><div id="responseFeedback"></div></div>`;setTimeout(()=>speakEnglish(q.q),200)}
+function responseResultHTML(q,correct,ok,answer){const extra=responseExtra(q);return `<div class="feedback ${ok?'correct':'wrong'}"><span id="responseResultLock" style="display:none"></span><strong>${ok?'🎉 ¡Muy bien!':'❌ Vamos a aprender de esta respuesta'}</strong><div class="explanation">${!ok?`<strong>Tu respuesta:</strong><br>${answer}<br><br>`:''}<strong>🇬🇧 Situación:</strong><br><span style="font-size:1.1em">${q.q}</span><br><strong>🇪🇸 Significado:</strong><br>${extra.qm}<br><br><strong>🇬🇧 Respuesta natural:</strong><br><span style="font-size:1.1em">${correct}</span><br><strong>🇪🇸 Significado:</strong><br>${extra.am}<br><br><strong>💡 ¿Por qué?</strong><br>${extra.why}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px"><button class="speech-button" onclick="speakEnglish('${esc(q.q)}')">🔊 SITUACIÓN</button><button class="speech-button" onclick="speakEnglish('${esc(correct)}')">🔊 RESPUESTA</button></div></div><button class="main-button" onclick="acceptResponseResult()">➡️ ACEPTAR Y CONTINUAR</button>`}
+function answerResponse(answer,correct,qtext){if(document.getElementById("responseResultLock"))return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=answer===correct,q=window.responseQuestions[responseQuestionIndex];if(ok){state.xp+=20;state.score+=20;state.streak++}else{state.streak=0}speakEnglish(correct);saveState();responseFeedback.innerHTML=responseResultHTML(q,correct,ok,answer)}
+function acceptResponseResult(){responseQuestionIndex++;if(responseQuestionIndex<window.responseQuestions.length)renderResponseQuestion();else{currentQuestion=0;currentGame++;nextGame()}}
 function nextGame(){gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else if(currentGame===4)showResponseGame();else if(currentGame===5&&activeCourse==="B1")showListeningGame();else completeLevel()}
 function gameHeader(title,text){return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/(activeCourse==="B1"?6:5)*100)}%"></div></div></div>`}
 function showVocabularyGame(){
