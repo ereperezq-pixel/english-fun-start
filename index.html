@@ -538,8 +538,58 @@ function answerFinalTest(answer,correct){document.querySelectorAll("#testContent
 function finishFinalTest(){if(finalTestScore>=14){state.xp+=100;state.score+=100;const next=nextCourseId(finalTestCourse);if(next)unlockCourse(next,`🎉 Prueba de ${finalTestCourse} superada.`);else{saveState();alert(`🏆 ¡Prueba final de ${finalTestCourse} superada! ${finalTestScore}/15.
 
 🔒 El curso siguiente aún no está terminado.`);showLevels();}}else{saveState();testContent.innerHTML=`<div class="center"><div style="font-size:70px">💪</div><h1>¡Necesitas un poco más!</h1><p>Has acertado <strong>${finalTestScore} de 15</strong>.</p><div class="feedback wrong">Necesitas <strong>14 de 15</strong> (90%) para superar la prueba.</div><button class="main-button" onclick="startFinalTest('${finalTestCourse}')">🔄 Repetir prueba</button><button class="secondary-button" onclick="showLevels()">🗺️ Volver a cursos</button></div>`;}}
-function nextGame(){gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else if(currentGame===4&&activeCourse==="B1")showListeningGame();else completeLevel()}
-function gameHeader(title,text){return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/(activeCourse==="B1"?5:4)*100)}%"></div></div></div>`}
+const responseGameData={
+A1:[
+ {q:"What’s your name?",a:"My name is Anna.",o:["My name is Anna.","I’m twenty years old.","I live in Madrid.","I’m fine, thanks."]},
+ {q:"How are you?",a:"I’m fine, thanks.",o:["It’s seven o’clock.","I’m fine, thanks.","I’m from Spain.","I like pizza."]},
+ {q:"Where are you from?",a:"I’m from Spain.",o:["I’m from Spain.","I’m a teacher.","I’m fine, thanks.","It’s Monday."]},
+ {q:"Where do you live?",a:"I live in Spain.",o:["I live in Spain.","I’m twelve years old.","I like coffee.","See you tomorrow."]},
+ {q:"What time do you get up?",a:"I get up at seven.",o:["I go to bed at ten.","I get up at seven.","I’m at home.","I have breakfast."]},
+ {q:"Would you like some water?",a:"Yes, please.",o:["Yes, please.","It’s blue.","I’m Spanish.","At seven o’clock."]},
+ {q:"What do you like?",a:"I like pizza.",o:["I like pizza.","I’m in the kitchen.","I’m twenty.","It’s Friday."]},
+ {q:"What are you doing?",a:"I’m having breakfast.",o:["I’m having breakfast.","I have two brothers.","I’m from Spain.","It’s my house."]}
+],
+A2:[
+ {q:"What do you usually do at the weekend?",a:"I usually meet my friends.",o:["I usually meet my friends.","I met them yesterday.","It was very expensive.","I’m looking for a hotel."]},
+ {q:"How often do you exercise?",a:"I exercise three times a week.",o:["I exercise three times a week.","I exercised yesterday.","I’m feeling better.","It takes twenty minutes."]},
+ {q:"Could I have the menu, please?",a:"Of course. Here you are.",o:["Of course. Here you are.","I went there last year.","It’s cheaper than that one.","I’m very tired."]},
+ {q:"What did you do yesterday?",a:"I went to the cinema.",o:["I go every Friday.","I went to the cinema.","I’m going tomorrow.","I don’t like films."]},
+ {q:"What are you going to do tomorrow?",a:"I’m going to visit my family.",o:["I visited them yesterday.","I’m going to visit my family.","I visit them every month.","I was at work."]},
+ {q:"Which one would you choose?",a:"I’d choose the cheaper one.",o:["I’d choose the cheaper one.","I chose it yesterday.","I’m choosing now.","It costs twenty euros."]},
+ {q:"What should I do if I feel ill?",a:"You should see a doctor.",o:["You should see a doctor.","I saw one last week.","I’m a doctor.","It’s near the station."]},
+ {q:"Excuse me, where is the station?",a:"It’s next to the bank.",o:["It’s next to the bank.","I went by train.","I’m waiting for a taxi.","It was very busy."]}
+],
+B1:[
+ {q:"I’m sorry, I’m going to be late.",a:"Don’t worry. Take your time.",o:["Don’t worry. Take your time.","I was late yesterday.","The meeting is tomorrow.","I don’t like waiting."]},
+ {q:"What do you think about the new project?",a:"I think it’s a good idea, but we need more time.",o:["I think it’s a good idea, but we need more time.","I finished it yesterday.","It’s on the desk.","I’m working from home."]},
+ {q:"Could you help me with this problem?",a:"Sure. Let’s have a look.",o:["Sure. Let’s have a look.","I had a problem last year.","It’s a difficult subject.","I can’t remember his name."]},
+ {q:"Why don’t we take the train instead?",a:"That sounds like a good idea.",o:["That sounds like a good idea.","I took it yesterday.","The train was delayed.","I’m at the station."]},
+ {q:"Have you ever been to London?",a:"Yes, I’ve been there twice.",o:["Yes, I’ve been there twice.","Yes, I went there tomorrow.","I’m going there every day.","It’s in England."]},
+ {q:"What should we do about the delay?",a:"We should contact the airline.",o:["We should contact the airline.","The flight was yesterday.","I’m at the airport.","It was a long journey."]},
+ {q:"Why are you learning English?",a:"I need it for work and travelling.",o:["I need it for work and travelling.","I learned it yesterday.","English is spoken here.","I’m working tomorrow."]},
+ {q:"What would you do if you had more free time?",a:"I’d travel more and learn new things.",o:["I’d travel more and learn new things.","I travelled last summer.","I’m free at five.","I have a lot of work."]}
+]};
+let responseQuestionIndex=0;
+function getResponseQuestions(){const pool=responseGameData[activeCourse]||responseGameData.A1;return shuffle(pool).slice(0,4)}
+function showResponseGame(){
+ const qs=getResponseQuestions(); responseQuestionIndex=0; window.responseQuestions=qs;
+ renderResponseQuestion();
+}
+function renderResponseQuestion(){
+ const q=window.responseQuestions[responseQuestionIndex];
+ gameContent.innerHTML=`${gameHeader("💬 ¿Qué responderías?","Lee la situación y elige la respuesta más natural.")}<div class="center"><div class="course-badge">🗣️ Inglés para conversar</div><div class="question"><strong>Alguien te dice:</strong><br><span style="font-size:1.2em">“${q.q}”</span></div><div class="answers">${shuffle(q.o).map(o=>`<button class="answer" onclick="answerResponse('${esc(o)}','${esc(q.a)}')">${o}</button>`).join("")}</div><div id="responseFeedback"></div></div>`;
+ setTimeout(()=>speakEnglish(q.q),200);
+}
+function answerResponse(answer,correct){
+ document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);
+ const ok=answer===correct;
+ if(ok){state.xp+=20;state.score+=20;state.streak++;speakEnglish(correct);responseFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Muy bien!<br><strong>${correct}</strong><br><br>💡 Esta es una respuesta natural para esta situación.</div>`;}
+ else{state.streak=0;speakEnglish(correct);responseFeedback.innerHTML=`<div class="feedback wrong">❌ No encaja en esta situación.<br><br>La mejor respuesta es:<br><strong>${correct}</strong></div>`;}
+ saveState();
+ setTimeout(()=>{responseQuestionIndex++;if(responseQuestionIndex<window.responseQuestions.length)renderResponseQuestion();else{currentQuestion=0;currentGame++;nextGame()}},ok?1200:1700);
+}
+function nextGame(){gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else if(currentGame===4)showResponseGame();else if(currentGame===5&&activeCourse==="B1")showListeningGame();else completeLevel()}
+function gameHeader(title,text){return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/(activeCourse==="B1"?6:5)*100)}%"></div></div></div>`}
 function showVocabularyGame(){
  const level=levels[currentLevel],item=level.vocab[currentQuestion%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
  gameContent.innerHTML=`${gameHeader("🖼️ Encuentra la palabra","Mira la imagen y elige la palabra correcta.")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Qué palabra es?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerVocabulary('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="vocabFeedback"></div></div>`
