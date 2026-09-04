@@ -487,6 +487,17 @@ if(!Array.isArray(state.unlockedLevelsA2)) state.unlockedLevelsA2=[0];
 if(!Array.isArray(state.unlockedLevelsB1)) state.unlockedLevelsB1=[0];
 if(!Array.isArray(state.completedLevels)) state.completedLevels=[];
 state.completedLevels=state.completedLevels.map(x=>typeof x==="number"?`A1-${x}`:x);
+const APP_VERSION="1.1.0";
+function showUpdateNotice(){
+  if(localStorage.getItem("englishFunLastSeenVersion")===APP_VERSION) return;
+  const el=document.createElement("div");
+  el.id="updateNotice";
+  el.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999";
+  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías?<br>🎭 Preparación para nuevas situaciones reales<br>🔊 Mejoras de audio y aprendizaje<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
+  document.body.appendChild(el);
+}
+function closeUpdateNotice(){localStorage.setItem("englishFunLastSeenVersion",APP_VERSION);document.getElementById("updateNotice")?.remove()}
+
 let activeCourse=state.activeCourse||"A1";
 let finalTestCourse="A1";
 levels=activeCourse==="A2"?a2Levels:(activeCourse==="B1"?b1Levels:a1Levels);
@@ -696,3 +707,4 @@ updateStats();showHome();
 </script>
 </body>
 </html>
+window.addEventListener("load",()=>setTimeout(showUpdateNotice,350));
