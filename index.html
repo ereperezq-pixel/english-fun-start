@@ -493,7 +493,7 @@ function showUpdateNotice(){
   const el=document.createElement("div");
   el.id="updateNotice";
   el.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999";
-  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías?\n🧠 4 segundos para aprender el significado en “¿Qué palabra es?” con explicación y traducción<br>🎭 Preparación para nuevas situaciones reales<br>🔊 Mejoras de audio y aprendizaje<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
+  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías?\n🧠 4 segundos para aprender el significado en “¿Qué palabra es?” con explicación y traducción<br>🎭 Preparación para nuevas situaciones reales<br>🔊 Voz en español e inglés en las parejas<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
   document.body.appendChild(el);
 }
 function closeUpdateNotice(){localStorage.setItem("englishFunLastSeenVersion",APP_VERSION);document.getElementById("updateNotice")?.remove()}
@@ -624,23 +624,23 @@ function showVocabularyGame(){
 function answerVocabulary(a,c){if(document.querySelectorAll("#gameContent .answer:disabled").length)return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=a===c;if(ok){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para leerlo y escucharlo.</span></div>`}else{state.streak=0;speakEnglish(c);vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para aprenderla.</span></div>`}saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},4000)}
 
 function speakMemoryCard(text, lang){
-  if(!state.voice) return;
+  if(!state.voice)return;
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(String(text));
-    u.lang=(lang==="es")?"es-ES":"en-GB";
+    u.lang=lang==="es"?"es-ES":"en-GB";
     u.rate=0.78;
     const voices=speechSynthesis.getVoices();
-    const v=voices.find(x=>(lang==="es"?/^es/i.test(x.lang):/^en-GB/i.test(x.lang)))
-      || voices.find(x=>(lang==="es"?/^es/i.test(x.lang):/^en/i.test(x.lang)));
-    if(v) u.voice=v;
+    const voice=voices.find(v=>lang==="es"?/^es-ES/i.test(v.lang):/^en-GB/i.test(v.lang))
+      || voices.find(v=>lang==="es"?/^es/i.test(v.lang):/^en/i.test(v.lang));
+    if(voice)u.voice=voice;
     speechSynthesis.speak(u);
   }catch(e){}
 }
 
 function showMemoryGame(){
  const selected=shuffle(levels[currentLevel].vocab).slice(0,4);memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryMistakes=0;memoryCards=[];
- selected.forEach(i=>{memoryCards.push({word:i[0],value:i[0],type:"english"});memoryCards.push({word:i[0],value:i[1],type:"spanish"})});memoryCards=shuffle(memoryCards);
+ selected.forEach(i=>{memoryCards.push({word:i[0],value:i[0],type:"english",lang:"en"});memoryCards.push({word:i[0],value:i[1],type:"spanish",lang:"es"})});memoryCards=shuffle(memoryCards);
  let h=`${gameHeader("🧠 Encuentra las parejas","Relaciona cada palabra en inglés con su significado en español.")}<div class="memory-grid">`;
  memoryCards.forEach((c,i)=>h+=`<button id="memory-${i}" class="memory-card" data-word="${esc(c.word)}" data-value="${esc(c.value)}" data-type="${c.type}" data-open="false" onclick="flipMemory(${i})">❓</button>`);
  h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>¡Muy bien! Has relacionado las palabras en inglés con sus significados en español.</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
@@ -650,7 +650,7 @@ function showMemoryGame(){
 }
 function flipMemory(index){
  if(memoryLocked||memoryCompleted)return;const card=document.getElementById("memory-"+index);if(!card||card.classList.contains("found")||card.dataset.open==="true")return;
- card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value; if(/^[A-Za-z]/.test(card.dataset.value)) speakEnglish(card.dataset.value);
+ card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value; speakMemoryCard(card.dataset.value, card.dataset.type==="spanish"?"es":"en");
  if(!memoryFirst){memoryFirst=card;return}
  if(memoryFirst.dataset.word===card.dataset.word){
   memoryFirst.classList.add("found");card.classList.add("found");memoryFirst.classList.remove("open");card.classList.remove("open");memoryFirst.dataset.open="false";card.dataset.open="false";memoryFirst=null;
