@@ -487,13 +487,13 @@ if(!Array.isArray(state.unlockedLevelsA2)) state.unlockedLevelsA2=[0];
 if(!Array.isArray(state.unlockedLevelsB1)) state.unlockedLevelsB1=[0];
 if(!Array.isArray(state.completedLevels)) state.completedLevels=[];
 state.completedLevels=state.completedLevels.map(x=>typeof x==="number"?`A1-${x}`:x);
-const APP_VERSION="1.2.0";
+const APP_VERSION="1.5.1";
 function showUpdateNotice(){
   if(localStorage.getItem("englishFunLastSeenVersion")===APP_VERSION) return;
   const el=document.createElement("div");
   el.id="updateNotice";
   el.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999";
-  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías? con explicación y traducción<br>🎭 Preparación para nuevas situaciones reales<br>🔊 Mejoras de audio y aprendizaje<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
+  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías?\n🧠 4 segundos para aprender el significado en “¿Qué palabra es?” con explicación y traducción<br>🎭 Situaciones reales con traducción y explicación<br>🔊 Voz en español e inglés en las parejas<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
   document.body.appendChild(el);
 }
 function closeUpdateNotice(){localStorage.setItem("englishFunLastSeenVersion",APP_VERSION);document.getElementById("updateNotice")?.remove()}
@@ -549,6 +549,57 @@ function answerFinalTest(answer,correct){document.querySelectorAll("#testContent
 function finishFinalTest(){if(finalTestScore>=14){state.xp+=100;state.score+=100;const next=nextCourseId(finalTestCourse);if(next)unlockCourse(next,`🎉 Prueba de ${finalTestCourse} superada.`);else{saveState();alert(`🏆 ¡Prueba final de ${finalTestCourse} superada! ${finalTestScore}/15.
 
 🔒 El curso siguiente aún no está terminado.`);showLevels();}}else{saveState();testContent.innerHTML=`<div class="center"><div style="font-size:70px">💪</div><h1>¡Necesitas un poco más!</h1><p>Has acertado <strong>${finalTestScore} de 15</strong>.</p><div class="feedback wrong">Necesitas <strong>14 de 15</strong> (90%) para superar la prueba.</div><button class="main-button" onclick="startFinalTest('${finalTestCourse}')">🔄 Repetir prueba</button><button class="secondary-button" onclick="showLevels()">🗺️ Volver a cursos</button></div>`;}}
+
+const realSituations={
+ A1:[
+  ["En una cafetería","The waiter asks: What would you like?",["I'd like a coffee, please.","I'm from Spain.","It's seven o'clock.","I have two brothers."],0,"Para pedir algo de forma educada usamos “I'd like…”","El camarero pregunta: ¿Qué te gustaría?","Me gustaría un café, por favor."],
+  ["En una tienda","Can I help you?",["Yes, I'm looking for a blue shirt.","I live in Madrid.","I get up at seven.","I was tired yesterday."],0,"“I'm looking for…” es una forma habitual de decir qué estás buscando.","¿Puedo ayudarte?","Sí, estoy buscando una camisa azul."],
+  ["En la calle","Excuse me, where is the station?",["It's near the bank.","I'm having breakfast.","I was tired yesterday.","I'd like some water."],0,"Para indicar una dirección usamos expresiones de lugar como “near” o “next to”.","Perdone, ¿dónde está la estación?","Está cerca del banco."],
+  ["En clase","Can you repeat that, please?",["Of course. I'll say it again.","I'm twenty years old.","It's on the table.","I went shopping."],0,"Cuando alguien pide que repitamos algo, “I'll say it again” es natural.","¿Puedes repetirlo, por favor?","Claro. Lo diré otra vez."]
+ ],
+ A2:[
+  ["En un restaurante","Are you ready to order?",["Yes. I'd like the chicken, please.","Yes, I went yesterday.","It's next to the hotel.","I usually get up at seven."],0,"“I'd like…” es una forma educada y natural de pedir comida.","¿Estás listo para pedir?","Sí. Quisiera el pollo, por favor."],
+  ["En una estación","Which train goes to Manchester?",["The next train leaves from platform three.","I went there last year.","It's very expensive.","I usually travel on Sundays."],0,"La pregunta pide información sobre el tren; indicamos cuál y desde qué andén sale.","¿Qué tren va a Manchester?","El próximo tren sale del andén tres."],
+  ["En el médico","How long have you had this pain?",["I've had it for three days.","I have lunch at one.","It's next to the pharmacy.","I went by bus."],0,"“I've had it for…” indica cuánto tiempo llevamos con algo.","¿Cuánto tiempo llevas con este dolor?","Lo tengo desde hace tres días."],
+  ["Haciendo planes","What are you doing this weekend?",["I'm going to visit my parents.","I visited them last month.","It's very interesting.","I have two brothers."],0,"“Be going to” es muy útil para hablar de planes futuros.","¿Qué vas a hacer este fin de semana?","Voy a visitar a mis padres."]
+ ],
+ B1:[
+  ["En el trabajo","Could you send me the report before the meeting?",["Sure. I'll send it as soon as I finish it.","I sent my friend a message yesterday.","The meeting is on the second floor.","I don't usually work on Fridays."],0,"Aceptamos la petición y usamos “I'll…” para indicar lo que haremos.","¿Podrías enviarme el informe antes de la reunión?","Claro. Lo enviaré en cuanto lo termine."],
+  ["Problema de viaje","I'm afraid our flight has been cancelled.",["Oh, I see. What are our options?","I cancelled my hotel last week.","The airport is very large.","I usually fly in summer."],0,"Ante un problema, pedir alternativas con “What are our options?” es natural.","Me temo que nuestro vuelo ha sido cancelado.","Ah, entiendo. ¿Qué opciones tenemos?"],
+  ["Opiniones","What do you think we should do about the problem?",["I think we should look for a practical solution.","I did it two years ago.","It's next to the office.","I have been there twice."],0,"“I think we should…” es una estructura muy útil para dar consejos.","¿Qué crees que deberíamos hacer con el problema?","Creo que deberíamos buscar una solución práctica."],
+  ["Vida cotidiana","Would you mind helping me carry these boxes?",["Not at all. I'll help you.","Yes, I carried them yesterday.","They're in the kitchen.","I don't like boxes."],0,"“Would you mind…?” es una petición educada y “Not at all” indica que no te importa.","¿Te importaría ayudarme a llevar estas cajas?","En absoluto. Te ayudaré."]
+ ]};
+
+
+function showRealSituations(){
+  const pool=(realSituations[activeCourse]||realSituations.A1).slice();
+  state.realSituations=shuffle(pool);
+  state.realSituationIndex=0;
+  renderRealSituation();
+}
+function renderRealSituation(){
+  const s=state.realSituations[state.realSituationIndex];
+  const opts=s[2];
+  gameContent.innerHTML=`${gameHeader("🎭 Situaciones reales","Elige la respuesta más natural para la situación.")}<div class="center"><div class="course-badge">🎭 Inglés en situaciones reales</div><h3>${s[0]}</h3><div class="question">“${s[1]}”</div><div class="answers">${shuffle(opts.map((o,i)=>({text:o,index:i}))).map(x=>`<button class="answer" onclick="answerRealSituation(${x.index})">${x.text}</button>`).join("")}</div><div id="realSituationFeedback"></div></div>`;
+  setTimeout(()=>speakEnglish(s[1]),200);
+}
+function answerRealSituation(i){
+  const s=state.realSituations[state.realSituationIndex];
+  if(s._answered)return;
+  s._answered=true;
+  const ok=i===s[3], answer=s[2][s[3]];
+  if(ok){state.xp+=20;state.score+=20;state.streak++;}else state.streak=0;
+  saveState();
+  const situationMeaning=s[5]||"Significado de la situación.";
+  const answerMeaning=s[6]||"Significado de la respuesta.";
+  realSituationFeedback.innerHTML=`<div class="feedback ${ok?'correct':'wrong'}"><strong>${ok?'🎉 ¡Muy bien!':'❌ Vamos a aprender de esta respuesta'}</strong><div class="explanation"><strong>🇬🇧 Situación:</strong><br>${s[1]}<br><strong>🇪🇸 Significado:</strong><br>${situationMeaning}<br><br><strong>🇬🇧 Respuesta natural:</strong><br>${answer}<br><strong>🇪🇸 Significado:</strong><br>${answerMeaning}<br><br><strong>💡 ¿Por qué?</strong><br>${s[4]}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px"><button class="speech-button" onclick="speakEnglish('${esc(s[1])}')">🔊 SITUACIÓN</button><button class="speech-button" onclick="speakEnglish('${esc(answer)}')">🔊 RESPUESTA</button></div></div><button class="main-button" onclick="acceptRealSituation()">➡️ ACEPTAR Y CONTINUAR</button>`;
+}
+function acceptRealSituation(){
+  state.realSituationIndex++;
+  if(state.realSituationIndex>=state.realSituations.length){currentQuestion=0;currentGame++;nextGame();}
+  else renderRealSituation();
+}
+
 const responseGameData={
 A1:[
  {q:"What’s your name?",a:"My name is Anna.",o:["My name is Anna.","I’m twenty years old.","I live in Madrid.","I’m fine, thanks."]},
@@ -613,7 +664,17 @@ function renderResponseQuestion(){const q=window.responseQuestions[responseQuest
 function responseResultHTML(q,correct,ok,answer){const extra=responseExtra(q);return `<div class="feedback ${ok?'correct':'wrong'}"><span id="responseResultLock" style="display:none"></span><strong>${ok?'🎉 ¡Muy bien!':'❌ Vamos a aprender de esta respuesta'}</strong><div class="explanation">${!ok?`<strong>Tu respuesta:</strong><br>${answer}<br><br>`:''}<strong>🇬🇧 Situación:</strong><br><span style="font-size:1.1em">${q.q}</span><br><strong>🇪🇸 Significado:</strong><br>${extra.qm}<br><br><strong>🇬🇧 Respuesta natural:</strong><br><span style="font-size:1.1em">${correct}</span><br><strong>🇪🇸 Significado:</strong><br>${extra.am}<br><br><strong>💡 ¿Por qué?</strong><br>${extra.why}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px"><button class="speech-button" onclick="speakEnglish('${esc(q.q)}')">🔊 SITUACIÓN</button><button class="speech-button" onclick="speakEnglish('${esc(correct)}')">🔊 RESPUESTA</button></div></div><button class="main-button" onclick="acceptResponseResult()">➡️ ACEPTAR Y CONTINUAR</button>`}
 function answerResponse(answer,correct,qtext){if(document.getElementById("responseResultLock"))return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=answer===correct,q=window.responseQuestions[responseQuestionIndex];if(ok){state.xp+=20;state.score+=20;state.streak++}else{state.streak=0}speakEnglish(correct);saveState();responseFeedback.innerHTML=responseResultHTML(q,correct,ok,answer)}
 function acceptResponseResult(){responseQuestionIndex++;if(responseQuestionIndex<window.responseQuestions.length)renderResponseQuestion();else{currentQuestion=0;currentGame++;nextGame()}}
-function nextGame(){gameContent.innerHTML="";if(currentGame===0)showVocabularyGame();else if(currentGame===1)showMemoryGame();else if(currentGame===2)showQuizGame();else if(currentGame===3)showSentenceGame();else if(currentGame===4)showResponseGame();else if(currentGame===5&&activeCourse==="B1")showListeningGame();else completeLevel()}
+function nextGame(){
+  gameContent.innerHTML="";
+  if(currentGame===0)showVocabularyGame();
+  else if(currentGame===1)showMemoryGame();
+  else if(currentGame===2)showQuizGame();
+  else if(currentGame===3)showSentenceGame();
+  else if(currentGame===4)showResponseGame();
+  else if(currentGame===5)showRealSituations();
+  else if(currentGame===6&&activeCourse==="B1")showListeningGame();
+  else completeLevel();
+}
 function gameHeader(title,text){return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/(activeCourse==="B1"?6:5)*100)}%"></div></div></div>`}
 function showVocabularyGame(){
  const level=levels[currentLevel],item=level.vocab[currentQuestion%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
@@ -621,20 +682,31 @@ function showVocabularyGame(){
 
  renderSpeech(); setTimeout(()=>speakEnglish(levels[currentLevel].vocab[currentQuestion%levels[currentLevel].vocab.length][0]),350);
 }
-function answerVocabulary(a,c){if(a===c){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},700)}else{state.streak=0;vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.</div>`;saveState()}}
+function answerVocabulary(a,c){if(document.querySelectorAll("#gameContent .answer:disabled").length)return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=a===c;if(ok){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para leerlo y escucharlo.</span></div>`}else{state.streak=0;speakEnglish(c);vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para aprenderla.</span></div>`}saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},4000)}
+
+function speakMemoryCard(text, lang){
+  if(!speechEnabled || !text || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  if(lang==="es"){
+    speakSpanish(text);
+  }else{
+    speakEnglish(text);
+  }
+}
+
 function showMemoryGame(){
  const selected=shuffle(levels[currentLevel].vocab).slice(0,4);memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryMistakes=0;memoryCards=[];
- selected.forEach(i=>{memoryCards.push({word:i[0],value:i[2]});memoryCards.push({word:i[0],value:i[0]})});memoryCards=shuffle(memoryCards);
- let h=`${gameHeader("🧠 Encuentra las parejas","Encuentra cada imagen con su palabra.")}<div class="memory-grid">`;
- memoryCards.forEach((c,i)=>h+=`<button id="memory-${i}" class="memory-card" data-word="${esc(c.word)}" data-value="${esc(c.value)}" data-open="false" onclick="flipMemory(${i})">❓</button>`);
- h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>¡Muy bien! Has relacionado las imágenes con las palabras.</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
+ selected.forEach(i=>{memoryCards.push({word:i[0],value:i[0],type:"english",lang:"en"});memoryCards.push({word:i[0],value:i[1],type:"spanish",lang:"es"})});memoryCards=shuffle(memoryCards);
+ let h=`${gameHeader("🧠 Encuentra las parejas","Relaciona cada palabra en inglés con su significado en español.")}<div class="memory-grid">`;
+ memoryCards.forEach((c,i)=>h+=`<button id="memory-${i}" class="memory-card" data-word="${esc(c.word)}" data-value="${esc(c.value)}" data-type="${c.type}" data-open="false" onclick="flipMemory(${i})">❓</button>`);
+ h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>¡Muy bien! Has relacionado las palabras en inglés con sus significados en español.</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
  gameContent.innerHTML=h
 
  renderSpeech();
 }
 function flipMemory(index){
  if(memoryLocked||memoryCompleted)return;const card=document.getElementById("memory-"+index);if(!card||card.classList.contains("found")||card.dataset.open==="true")return;
- card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value; if(/^[A-Za-z]/.test(card.dataset.value)) speakEnglish(card.dataset.value);
+ card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value; speakMemoryCard(card.dataset.value, card.dataset.type==="spanish"?"es":"en");
  if(!memoryFirst){memoryFirst=card;return}
  if(memoryFirst.dataset.word===card.dataset.word){
   memoryFirst.classList.add("found");card.classList.add("found");memoryFirst.classList.remove("open");card.classList.remove("open");memoryFirst.dataset.open="false";card.dataset.open="false";memoryFirst=null;
