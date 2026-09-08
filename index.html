@@ -698,13 +698,56 @@ function nextGame(){
   else completeLevel();
 }
 function gameHeader(title,text){const totalGames=activeCourse==="B1"?8:7;return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/totalGames*100)}%"></div></div></div>`}
+const advancedVerbPool = [
+ ["go","went","ir"],["come","came","venir"],["see","saw","ver"],["take","took","coger / llevar"],
+ ["make","made","hacer"],["find","found","encontrar"],["give","gave","dar"],["know","knew","saber / conocer"],
+ ["think","thought","pensar"],["bring","brought","traer"],["buy","bought","comprar"],["choose","chose","elegir"],
+ ["feel","felt","sentir"],["keep","kept","guardar / mantener"],["leave","left","salir / dejar"],["meet","met","conocer / quedar"],
+ ["pay","paid","pagar"],["read","read","leer"],["run","ran","correr"],["say","said","decir"],
+ ["sell","sold","vender"],["send","sent","enviar"],["sit","sat","sentarse"],["sleep","slept","dormir"],
+ ["speak","spoke","hablar"],["spend","spent","gastar / pasar tiempo"],["stand","stood","estar de pie"],["teach","taught","enseñar"],
+ ["tell","told","decir / contar"],["understand","understood","entender"],["wear","wore","llevar puesto"],["win","won","ganar"],
+ ["write","wrote","escribir"],["break","broke","romper"],["build","built","construir"],["catch","caught","coger / atrapar"],
+ ["drive","drove","conducir"],["fall","fell","caer"],["forget","forgot","olvidar"],["hear","heard","oír"],
+ ["hold","held","sujetar / mantener"],["lose","lost","perder"],["put","put","poner"],["rise","rose","subir / levantarse"],
+ ["shake","shook","sacudir"],["show","showed","mostrar"],["steal","stole","robar"],["throw","threw","lanzar"]
+];
+function getAdvancedVocabularyChallenge(){
+  const idx=(currentLevel*4+currentQuestion)%advancedVerbPool.length;
+  const [base,past,meaning]=advancedVerbPool[idx];
+  const distractors=shuffle(advancedVerbPool.filter(x=>x[1]!==past && x[0]!==base).map(x=>x[1])).slice(0,3);
+  const answer=past;
+  return {base,past,meaning,options:shuffle([answer,...distractors])};
+}
+const phrasalVerbPool = [
+ ["find out","averiguar / descubrir"],["give up","rendirse / dejar de intentarlo"],["look after","cuidar"],["pick up","recoger / pasar a buscar"],
+ ["turn on","encender"],["turn off","apagar"],["look for","buscar"],["carry on","continuar"],["get along","llevarse bien"],["get back","volver / regresar"],
+ ["get up","levantarse"],["go on","continuar / suceder"],["grow up","crecer / hacerse adulto"],["look forward to","tener ganas de"],["put off","posponer"],["take off","despegar / quitarse"],
+ ["work out","salir bien / hacer ejercicio"],["run out of","quedarse sin"],["set up","montar / configurar"],["sort out","resolver / organizar"],["take care of","cuidar / encargarse de"],["try on","probarse"],
+ ["wake up","despertarse"],["fill in","rellenar"],["hand in","entregar"],["hang on","esperar / aguantar"],["join in","participar"],["make up","inventar / reconciliarse"],
+ ["point out","señalar / destacar"],["put away","guardar"],["put on","ponerse / encender"],["take back","devolver / retractarse"],["throw away","tirar"],["use up","gastar / agotar"],
+ ["break down","averiarse / venirse abajo"],["break up","romper / terminar una relación"],["bring up","mencionar / criar"],["call back","devolver una llamada"],["cut down on","reducir"],["deal with","tratar / ocuparse de"]
+];
+function getAdvancedMemoryPairs(){
+  const start=(currentLevel*4)%phrasalVerbPool.length;
+  const selected=[];
+  for(let i=0;i<4;i++)selected.push(phrasalVerbPool[(start+i)%phrasalVerbPool.length]);
+  return selected;
+}
+
 function showVocabularyGame(){
+ if(activeCourse!=="A1"&&activeCourse!=="A2"){
+   const q=getAdvancedVocabularyChallenge();
+   const options=q.options;
+   gameContent.innerHTML=`${gameHeader("🧠 Palabra y pasado","Ahora el vocabulario incluye formas verbales y pasado simple.")}<div class="center"><div class="course-badge">📚 Reto B1+</div><div class="question">¿Cuál es el pasado simple de <strong>${q.base}</strong>?</div><div class="small" style="margin:10px 0">Significa: ${q.meaning}</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerVocabulary('${esc(o)}','${esc(q.past)}')">${o}</button>`).join("")}</div><div id="vocabFeedback"></div></div>`;
+   renderSpeech(); setTimeout(()=>speakEnglish(q.base),350); return;
+ }
  const level=levels[currentLevel],item=level.vocab[currentQuestion%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
  gameContent.innerHTML=`${gameHeader("🖼️ Encuentra la palabra","Mira la imagen y elige la palabra correcta.")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Qué palabra es?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerVocabulary('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="vocabFeedback"></div></div>`
-
  renderSpeech(); setTimeout(()=>speakEnglish(levels[currentLevel].vocab[currentQuestion%levels[currentLevel].vocab.length][0]),350);
 }
-function answerVocabulary(a,c){if(document.querySelectorAll("#gameContent .answer:disabled").length)return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=a===c;if(ok){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para leerlo y escucharlo.</span></div>`}else{state.streak=0;speakEnglish(c);vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para aprenderla.</span></div>`}saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},4000)}
+function answerVocabulary(a,c){if(document.querySelectorAll("#gameContent .answer:disabled").length)return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=a===c;if(ok){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=activeCourse!=="A1"&&activeCourse!=="A2"?`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> es el pasado de <strong>${getAdvancedBase(c)}</strong>.<br><span class="small">💡 Escucha la forma correcta y fíjate en el cambio del verbo.</span></div>`:`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para leerlo y escucharlo.</span></div>`}else{state.streak=0;speakEnglish(c);vocabFeedback.innerHTML=activeCourse!=="A1"&&activeCourse!=="A2"?`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.<br><span class="small">💡 Es el pasado de <strong>${getAdvancedBase(c)}</strong>. Escúchalo y memoriza el cambio.</span></div>`:`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para aprenderla.</span></div>`}saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},4000)}
+function getAdvancedBase(past){const x=advancedVerbPool.find(v=>v[1]===past);return x?x[0]:"el verbo"}
 
 function speakMemoryCard(text, lang){
   if(!speechEnabled || !text || !("speechSynthesis" in window)) return;
@@ -717,14 +760,14 @@ function speakMemoryCard(text, lang){
 }
 
 function showMemoryGame(){
- const selected=shuffle(levels[currentLevel].vocab).slice(0,4);memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryMistakes=0;memoryCards=[];
- selected.forEach(i=>{memoryCards.push({word:i[0],value:i[0],type:"english",lang:"en"});memoryCards.push({word:i[0],value:i[1],type:"spanish",lang:"es"})});memoryCards=shuffle(memoryCards);
- let h=`${gameHeader("🧠 Encuentra las parejas","Relaciona cada palabra en inglés con su significado en español.")}<div class="memory-grid">`;
+ const advanced=activeCourse!=="A1"&&activeCourse!=="A2";
+ const selected=advanced?getAdvancedMemoryPairs():shuffle(levels[currentLevel].vocab).slice(0,4);
+ memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryMistakes=0;memoryCards=[];
+ selected.forEach(i=>{const en=advanced?i[0]:i[0],es=advanced?i[1]:i[1];memoryCards.push({word:en,value:en,type:"english",lang:"en"});memoryCards.push({word:en,value:es,type:"spanish",lang:"es"})});memoryCards=shuffle(memoryCards);
+ let h=`${gameHeader(advanced?"🧠 Phrasal verbs: encuentra las parejas":"🧠 Encuentra las parejas",advanced?"Relaciona cada phrasal verb con su significado. En B1+ ya no son parejas de palabras básicas.":"Relaciona cada palabra en inglés con su significado en español.")}<div class="memory-grid">`;
  memoryCards.forEach((c,i)=>h+=`<button id="memory-${i}" class="memory-card" data-word="${esc(c.word)}" data-value="${esc(c.value)}" data-type="${c.type}" data-open="false" onclick="flipMemory(${i})">❓</button>`);
- h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>¡Muy bien! Has relacionado las palabras en inglés con sus significados en español.</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
- gameContent.innerHTML=h
-
- renderSpeech();
+ h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>${advanced?"¡Muy bien! Has relacionado phrasal verbs con su significado.":"¡Muy bien! Has relacionado las palabras en inglés con sus significados en español."}</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
+ gameContent.innerHTML=h; renderSpeech();
 }
 function flipMemory(index){
  if(memoryLocked||memoryCompleted)return;const card=document.getElementById("memory-"+index);if(!card||card.classList.contains("found")||card.dataset.open==="true")return;
