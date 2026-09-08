@@ -493,7 +493,7 @@ function showUpdateNotice(){
   const el=document.createElement("div");
   el.id="updateNotice";
   el.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999";
-  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías?\n🧠 4 segundos para aprender el significado en “¿Qué palabra es?” con explicación y traducción<br>🎭 Situaciones reales con traducción y explicación\n🎧 ¿Qué has entendido? con conversaciones, repetición, traducción y ayuda por oración<br>🔊 Voz en español e inglés en las parejas<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
+  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start</strong> tiene novedades.</p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 En esta actualización:</strong><br>💬 ¿Qué responderías?\n🧠 4 segundos para aprender el significado en “¿Qué palabra es?” con explicación y traducción<br>🎭 Situaciones reales con traducción y explicación<br>🎧 ¿Qué has entendido? con conversaciones adaptadas a cada nivel, repetición y ayuda por oración<br>🔊 Voz en español e inglés en las parejas<br>⚙️ Mejoras de actualización de la PWA</div><p class="small">Tu progreso y niveles desbloqueados se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
   document.body.appendChild(el);
 }
 function closeUpdateNotice(){localStorage.setItem("englishFunLastSeenVersion",APP_VERSION);document.getElementById("updateNotice")?.remove()}
@@ -542,7 +542,7 @@ function showCourseUnlock(course){const next=nextCourseId(course||activeCourse);
 function renderCourses(){const grid=document.getElementById("courseGrid");if(!grid)return;grid.innerHTML=[{id:"A1",title:"A1 · Básico",desc:"Primeros pasos y comunicación cotidiana",unlocked:true},{id:"A2",title:"A2 · Básico alto",desc:"Más conversación, pasado, planes y opiniones",unlocked:state.unlockedCourses.includes("A2")},{id:"B1",title:"B1 · Intermedio",desc:"Comunicación independiente y situaciones reales",unlocked:state.unlockedCourses.includes("B1")}].map(c=>`<button class="level-button ${c.unlocked?(activeCourse===c.id?"completed":"unlocked"):"locked"}" ${c.unlocked?`onclick="switchCourse('${c.id}')"`:"disabled"}><div class="level-number">CURSO</div><div class="level-title">${c.unlocked?"🎓":"🔒"} ${c.title}</div><div class="small">${c.desc}</div></button>`).join("");}
 function renderLevels(){const grid=document.getElementById("levelGrid");if(!grid)return;document.getElementById("courseTitle").innerText=`🗺️ ${activeCourse} · Niveles`;const descriptions={A1:"A1: vocabulario y frases cotidianas, desde principiante.",A2:"A2: comunicación cotidiana más amplia, pasado, planes, comparaciones, opiniones y situaciones prácticas.",B1:"B1: comunicación independiente, experiencias, opiniones, narración, problemas, trabajo y situaciones reales."};document.getElementById("courseDescription").innerText=descriptions[activeCourse];grid.innerHTML="";const unlockedList=courseUnlockedLevels();levels.forEach((level,index)=>{const unlocked=index===0||unlockedList.includes(index),completed=state.completedLevels.includes(`${activeCourse}-${index}`),b=document.createElement("button");b.className="level-button "+(unlocked?"unlocked ":"locked ")+(completed?"completed":"");b.disabled=!unlocked;b.innerHTML=`<div class="level-number">${activeCourse} · NIVEL ${index+1}</div><div class="level-title">${completed?"✅ ":""}${level.title}</div><div class="small">${completed?"Nivel completado":unlocked?"Pulsa para empezar":"Completa el nivel anterior"}`;if(unlocked)b.onclick=()=>startLevel(index);grid.appendChild(b);});const panel=document.getElementById("courseUnlockPanel");if(panel){const next=nextCourseId(activeCourse);if(next&&!state.unlockedCourses.includes(next)){panel.innerHTML=`<h3>🎓 Pasar de ${activeCourse} a ${next}</h3><p>Puedes acceder a ${next} completando los 20 niveles, superando una prueba con <strong>90%</strong> (14/15) o usando la clave <strong>1111</strong>.</p><button class="main-button" onclick="startFinalTest('${activeCourse}')">📝 Prueba de paso · 15 preguntas</button><button class="secondary-button" onclick="unlockCourseWithKey('${activeCourse}')">🔑 Acceder a ${next} con clave</button>`;}else if(next){panel.innerHTML=`<h3>➡️ ${next} está desbloqueado</h3><button class="main-button" onclick="switchCourse('${next}')">🎓 Ir a ${next}</button>`;}else{panel.innerHTML=`<h3>🏁 ${activeCourse} · Último curso disponible</h3><p>🔒 <strong>El curso siguiente aún no está terminado.</strong></p>`;}}}
 function isLevelUnlocked(index){const list=courseUnlockedLevels();return index<PUBLISHED_LEVELS&&(index===0||list.includes(index));}
-function startLevel(index){if(index>=PUBLISHED_LEVELS){alert("🔒 Este nivel llegará en una próxima actualización.");return}if(!isLevelUnlocked(index)){alert("🔒 Este nivel está bloqueado. Completa el anterior.");return}currentLevel=index;state.currentLevel=index;currentGame=0;currentQuestion=0;memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryMistakes=0;sentenceSelected=[];listeningConversationIndex=0;listeningConversationSet=[];saveState();hideAllScreens();gameScreen.classList.remove("hidden");nextGame();}
+function startLevel(index){if(index>=PUBLISHED_LEVELS){alert("🔒 Este nivel llegará en una próxima actualización.");return}if(!isLevelUnlocked(index)){alert("🔒 Este nivel está bloqueado. Completa el anterior.");return}currentLevel=index;state.currentLevel=index;currentGame=0;currentQuestion=0;memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryMistakes=0;sentenceSelected=[];saveState();hideAllScreens();gameScreen.classList.remove("hidden");nextGame();}
 function startFinalTest(course="A1"){finalTestIndex=0;finalTestScore=0;finalTestCourse=course;const source=getCourseLevels(course),base=source.flatMap(l=>l.vocab);finalTestQuestions=shuffle(base).slice(0,15).map(item=>{const options=shuffle(base.filter(x=>x[0]!==item[0]).map(x=>x[0])).slice(0,3);options.push(item[0]);return{spanish:item[1],english:item[0],emoji:item[2],options:shuffle(options)}});hideAllScreens();testScreen.classList.remove("hidden");showFinalTestQuestion();}
 function showFinalTestQuestion(){const q=finalTestQuestions[finalTestIndex];testContent.innerHTML=`<div class="center"><div class="small">PRUEBA DE PASO · ${finalTestCourse}</div><h2>📝 Pregunta ${finalTestIndex+1} de 15</h2><div class="progress"><div class="progress-bar" style="width:${(finalTestIndex/15)*100}%"></div></div><div class="vocab-image">${q.emoji}</div><div class="question">¿Cómo se dice <strong>${q.spanish}</strong> en inglés?</div><div class="answers">${q.options.map(o=>`<button class="answer" onclick="answerFinalTest('${esc(o)}','${esc(q.english)}')">${o}</button>`).join("")}</div><div class="test-progress">Necesitas un mínimo del <strong>90%</strong>: 14 aciertos de 15.</div><div id="testFeedback"></div></div>`;setTimeout(()=>speakEnglish(q.english),250);}
 function answerFinalTest(answer,correct){document.querySelectorAll("#testContent .answer").forEach(b=>b.disabled=true);if(answer===correct){finalTestScore++;state.xp+=10;state.score+=10;state.streak++;speakEnglish(correct);testFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!</div>`;}else{state.streak=0;speakEnglish(correct);testFeedback.innerHTML=`<div class="feedback wrong">❌ La respuesta correcta es <strong>${correct}</strong>.</div>`;}saveState();setTimeout(()=>{finalTestIndex++;if(finalTestIndex<15)showFinalTestQuestion();else finishFinalTest();},850);}
@@ -664,126 +664,300 @@ function renderResponseQuestion(){const q=window.responseQuestions[responseQuest
 function responseResultHTML(q,correct,ok,answer){const extra=responseExtra(q);return `<div class="feedback ${ok?'correct':'wrong'}"><span id="responseResultLock" style="display:none"></span><strong>${ok?'🎉 ¡Muy bien!':'❌ Vamos a aprender de esta respuesta'}</strong><div class="explanation">${!ok?`<strong>Tu respuesta:</strong><br>${answer}<br><br>`:''}<strong>🇬🇧 Situación:</strong><br><span style="font-size:1.1em">${q.q}</span><br><strong>🇪🇸 Significado:</strong><br>${extra.qm}<br><br><strong>🇬🇧 Respuesta natural:</strong><br><span style="font-size:1.1em">${correct}</span><br><strong>🇪🇸 Significado:</strong><br>${extra.am}<br><br><strong>💡 ¿Por qué?</strong><br>${extra.why}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px"><button class="speech-button" onclick="speakEnglish('${esc(q.q)}')">🔊 SITUACIÓN</button><button class="speech-button" onclick="speakEnglish('${esc(correct)}')">🔊 RESPUESTA</button></div></div><button class="main-button" onclick="acceptResponseResult()">➡️ ACEPTAR Y CONTINUAR</button>`}
 function answerResponse(answer,correct,qtext){if(document.getElementById("responseResultLock"))return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=answer===correct,q=window.responseQuestions[responseQuestionIndex];if(ok){state.xp+=20;state.score+=20;state.streak++}else{state.streak=0}speakEnglish(correct);saveState();responseFeedback.innerHTML=responseResultHTML(q,correct,ok,answer)}
 function acceptResponseResult(){responseQuestionIndex++;if(responseQuestionIndex<window.responseQuestions.length)renderResponseQuestion();else{currentQuestion=0;currentGame++;nextGame()}}
+function nextGame(){
+  gameContent.innerHTML="";
+  if(currentGame===0)showVocabularyGame();
+  else if(currentGame===1)showMemoryGame();
+  else if(currentGame===2)showQuizGame();
+  else if(currentGame===3)showSentenceGame();
+  else if(currentGame===4)showResponseGame();
+  else if(currentGame===5)showRealSituations();
+  else if(currentGame===6)showConversationListeningGame();
+  else if(currentGame===7&&activeCourse==="B1")showListeningGame();
+  else completeLevel();
+}
+function gameHeader(title,text){const totalGames=activeCourse==="B1"?8:7;return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/totalGames*100)}%"></div></div></div>`}
+function showVocabularyGame(){
+ const level=levels[currentLevel],item=level.vocab[currentQuestion%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
+ gameContent.innerHTML=`${gameHeader("🖼️ Encuentra la palabra","Mira la imagen y elige la palabra correcta.")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Qué palabra es?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerVocabulary('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="vocabFeedback"></div></div>`
+
+ renderSpeech(); setTimeout(()=>speakEnglish(levels[currentLevel].vocab[currentQuestion%levels[currentLevel].vocab.length][0]),350);
+}
+function answerVocabulary(a,c){if(document.querySelectorAll("#gameContent .answer:disabled").length)return;document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);const ok=a===c;if(ok){speakEnglish(c);state.xp+=10;state.score+=10;state.streak++;vocabFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para leerlo y escucharlo.</span></div>`}else{state.streak=0;speakEnglish(c);vocabFeedback.innerHTML=`<div class="feedback wrong">❌ Casi.<br>La respuesta correcta es <strong>${c}</strong>.<br><strong>${c}</strong> significa <strong>${getSpanish(c)}</strong>.<br><span class="small">⏳ Tómate unos segundos para aprenderla.</span></div>`}saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showVocabularyGame()},4000)}
+
+function speakMemoryCard(text, lang){
+  if(!speechEnabled || !text || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  if(lang==="es"){
+    speakSpanish(text);
+  }else{
+    speakEnglish(text);
+  }
+}
+
+function showMemoryGame(){
+ const selected=shuffle(levels[currentLevel].vocab).slice(0,4);memoryFirst=null;memoryLocked=false;memoryCompleted=false;memoryMistakes=0;memoryCards=[];
+ selected.forEach(i=>{memoryCards.push({word:i[0],value:i[0],type:"english",lang:"en"});memoryCards.push({word:i[0],value:i[1],type:"spanish",lang:"es"})});memoryCards=shuffle(memoryCards);
+ let h=`${gameHeader("🧠 Encuentra las parejas","Relaciona cada palabra en inglés con su significado en español.")}<div class="memory-grid">`;
+ memoryCards.forEach((c,i)=>h+=`<button id="memory-${i}" class="memory-card" data-word="${esc(c.word)}" data-value="${esc(c.value)}" data-type="${c.type}" data-open="false" onclick="flipMemory(${i})">❓</button>`);
+ h+=`</div><div id="memoryMessage"></div><div id="memoryComplete" class="memory-complete"><div style="font-size:50px">🎉</div><h3>¡Todas las parejas encontradas!</h3><p>¡Muy bien! Has relacionado las palabras en inglés con sus significados en español.</p><button class="main-button" onclick="finishMemoryGame()">➡️ Siguiente ejercicio</button></div>`;
+ gameContent.innerHTML=h
+
+ renderSpeech();
+}
+function flipMemory(index){
+ if(memoryLocked||memoryCompleted)return;const card=document.getElementById("memory-"+index);if(!card||card.classList.contains("found")||card.dataset.open==="true")return;
+ card.dataset.open="true";card.classList.add("open");card.innerText=card.dataset.value; speakMemoryCard(card.dataset.value, card.dataset.type==="spanish"?"es":"en");
+ if(!memoryFirst){memoryFirst=card;return}
+ if(memoryFirst.dataset.word===card.dataset.word){
+  memoryFirst.classList.add("found");card.classList.add("found");memoryFirst.classList.remove("open");card.classList.remove("open");memoryFirst.dataset.open="false";card.dataset.open="false";memoryFirst=null;
+  state.xp+=20;state.score+=20;state.streak++;saveState();checkMemoryComplete()
+ }else{
+  memoryLocked=true;memoryMistakes++;saveState();const first=memoryFirst;setTimeout(()=>{first.dataset.open="false";first.classList.remove("open");first.innerText="❓";card.dataset.open="false";card.classList.remove("open");card.innerText="❓";memoryFirst=null;memoryLocked=false},850)
+ }
+}
+function checkMemoryComplete(){
+ if(memoryCompleted)return;const cards=document.querySelectorAll(".memory-card"),found=document.querySelectorAll(".memory-card.found");
+ if(cards.length&&found.length===cards.length){memoryCompleted=true;memoryLocked=true;memoryMessage.innerHTML=`<div class="feedback correct">🎉 ¡Perfecto! Has encontrado todas las parejas.</div>`;memoryComplete.style.display="block"}
+}
+function finishMemoryGame(){if(!memoryCompleted)return;currentGame++;currentQuestion=0;memoryFirst=null;memoryLocked=false;nextGame()}
+function showQuizGame(){
+ const level=levels[currentLevel],item=level.vocab[(currentQuestion+3)%level.vocab.length];let options=shuffle(level.vocab.map(x=>x[0]).filter(x=>x!==item[0])).slice(0,3);options.push(item[0]);options=shuffle(options);
+ gameContent.innerHTML=`${gameHeader("❓ Quiz","¿Recuerdas esta palabra?")}<div class="center"><div class="vocab-image">${item[2]}</div><div class="question">¿Cómo se dice <strong>${item[1]}</strong> en inglés?</div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerQuiz('${esc(o)}','${esc(item[0])}')">${o}</button>`).join("")}</div><div id="quizFeedback"></div></div>`
+
+ renderSpeech(); setTimeout(()=>speakEnglish(levels[currentLevel].vocab[(currentQuestion+3)%levels[currentLevel].vocab.length][0]),350);
+}
+function answerQuiz(a,c){if(a===c){speakEnglish(c);state.xp+=15;state.score+=15;state.streak++;quizFeedback.innerHTML=`<div class="feedback correct">🎉 ¡Correcto!</div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showQuizGame()},700)}else{state.streak=0;quizFeedback.innerHTML=`<div class="feedback wrong">❌ No pasa nada.<br>La respuesta correcta era: <strong>${c}</strong>.</div>`;saveState()}}
+function showSentenceGame(){
+ const s=levels[currentLevel].sentences[currentQuestion%levels[currentLevel].sentences.length];sentenceWords=shuffle(s.words.map((word,id)=>({id,word})));sentenceSelected=[];
+ gameContent.innerHTML=`${gameHeader("🧩 Construye la frase","Las palabras están desordenadas. Pulsa en ellas para formar la frase.")}<div class="center"><div class="question">💬 Ordena la frase</div><div id="sentenceArea" class="sentence-area"><span class="small">Pulsa las palabras de abajo...</span></div><div id="sentenceOptions" class="answers">${sentenceWords.map(i=>`<button id="word-${i.id}" class="word-button" onclick="selectSentenceWord(${i.id})">${i.word}</button>`).join("")}</div><br><button class="main-button" onclick="checkSentence()">✅ Comprobar</button><div id="sentenceFeedback"></div></div>`
+
+ renderSpeech();
+}
+function selectSentenceWord(id){const item=sentenceWords.find(x=>x.id===id);if(!item||sentenceSelected.some(x=>x.id===id))return;sentenceSelected.push(item);const b=document.getElementById("word-"+id);if(b){b.disabled=true;b.style.opacity=".45"}renderSentenceArea()}
+function renderSentenceArea(){sentenceArea.innerHTML=sentenceSelected.length?sentenceSelected.map(i=>`<button class="word-button" onclick="removeSentenceWord(${i.id})">${i.word}</button>`).join(""):`<span class="small">Pulsa las palabras de abajo...</span>`}
+function removeSentenceWord(id){sentenceSelected=sentenceSelected.filter(x=>x.id!==id);const b=document.getElementById("word-"+id);if(b){b.disabled=false;b.style.opacity="1"}renderSentenceArea()}
+function sentenceExtra(s){
+ const text=(s.words||[]).join(" ").toLowerCase();
+ let usage="Esta frase es útil para practicar inglés en una situación cotidiana.";
+ let alternatives=[]; let phrasal="";
+ if(/get up/.test(text)){usage="Se usa para hablar de la hora o rutina a la que alguien se levanta.";phrasal="get up = levantarse";}
+ else if(/find out/.test(text)){usage="Se usa cuando quieres descubrir o averiguar una información que no conocías.";phrasal="find out = averiguar / descubrir";alternatives=["discover = descubrir"];}
+ else if(/look for/.test(text)){usage="Se usa cuando estás intentando encontrar una persona o cosa.";phrasal="look for = buscar";alternatives=["search for = buscar"];}
+ else if(/look after/.test(text)){usage="Se usa cuando alguien se encarga de cuidar a una persona, animal o cosa.";phrasal="look after = cuidar / encargarse de";}
+ else if(/carry on/.test(text)){usage="Se usa para indicar que una acción continúa.";phrasal="carry on = continuar / seguir";alternatives=["continue = continuar"];}
+ else if(/pick up/.test(text)){usage="Según el contexto puede significar recoger algo o pasar a buscar a alguien.";phrasal="pick up = recoger / pasar a buscar";}
+ else if(/turn on/.test(text)){usage="Se utiliza para encender aparatos, luces o dispositivos.";phrasal="turn on = encender";}
+ else if(/turn off/.test(text)){usage="Se utiliza para apagar aparatos, luces o dispositivos.";phrasal="turn off = apagar";}
+ else if(/give up/.test(text)){usage="Se usa cuando alguien deja de intentar algo o abandona.";phrasal="give up = rendirse / dejar de intentar";}
+ else if(/should/.test(text)){usage="Should se utiliza principalmente para dar consejos o recomendaciones.";alternatives=["ought to = deberías / convendría"];}
+ else if(/must/.test(text)){usage="Must expresa una obligación o necesidad fuerte.";alternatives=["have to = tener que"];}
+ else if(/might/.test(text)){usage="Might expresa una posibilidad.";alternatives=["may = puede que / quizá"];}
+ else if(/because/.test(text)){usage="Because introduce la razón o causa de algo.";alternatives=["since = ya que", "as = ya que"];}
+ else if(/although/.test(text)){usage="Although introduce un contraste: algo ocurre a pesar de otra circunstancia.";alternatives=["even though = aunque / a pesar de que"];}
+ return {usage,alternatives,phrasal};
+}
+function sentenceResultHTML(s,correct,ok,user){
+ const extra=sentenceExtra(s);
+ return `<div class="feedback ${ok?'correct':'wrong'}"><strong>${ok?'🎉 ¡Perfecto!':'❌ Todavía no.'}</strong><div class="explanation">${!ok?`<strong>Lo que has escrito:</strong><br>${user||'(nada)'}<br><br>`:''}<strong>🇬🇧 Frase correcta:</strong><br><span style="font-size:1.15em">${correct}</span><br><br><strong>🇪🇸 Significado:</strong><br>${s.meaning}<br><br><strong>💡 Cómo se usa:</strong><br>${extra.usage}${extra.phrasal?`<br><br><strong>🔗 Phrasal verb:</strong><br>${extra.phrasal}`:''}${extra.alternatives.length?`<br><br><strong>🔄 Otras formas parecidas:</strong><br>${extra.alternatives.join('<br>')}`:''}<br><br><strong>📌 Nota:</strong><br>${s.curiosity}</div><button class="main-button" onclick="acceptSentenceResult()">➡️ ACEPTAR Y CONTINUAR</button></div>`;
+}
+function acceptSentenceResult(){
+ currentQuestion++;
+ if(currentQuestion>=levels[currentLevel].sentences.length){currentQuestion=0;currentGame++;nextGame();}
+ else showSentenceGame();
+}
+function checkSentence(){
+ const s=levels[currentLevel].sentences[currentQuestion%levels[currentLevel].sentences.length],user=sentenceSelected.map(x=>x.word).join(" "),correct=s.words.join(" ");
+ if(document.getElementById("sentenceResultLock"))return;
+ const ok=user.toLowerCase()===correct.toLowerCase();
+ if(ok){speakEnglish(correct);state.xp+=30;state.score+=30;state.streak++;saveState();}
+ else{speakEnglish(correct);state.streak=0;saveState();}
+ sentenceFeedback.innerHTML=`<span id="sentenceResultLock" style="display:none"></span>`+sentenceResultHTML(s,correct,ok,user);
+}
+
+/* 🎧 ¿QUÉ HAS ENTENDIDO? — conversaciones adaptadas al nivel */
 const listeningConversations={
 A1:[
- {title:"En casa",lines:[
-  ["Hello, Anna!","¡Hola, Anna!","Saludo básico para iniciar una conversación."],
-  ["Hi, Tom! How are you?","¡Hola, Tom! ¿Cómo estás?","How are you? pregunta cómo se encuentra la otra persona."],
-  ["I'm fine, thank you.","Estoy bien, gracias.","I'm fine es una forma muy habitual de decir que estás bien."],
-  ["Are you at home?","¿Estás en casa?","Are you…? se usa para preguntar si alguien está en un lugar o situación."],
-  ["Yes, I am.","Sí.","Yes, I am responde afirmativamente a una pregunta con are." ]
- ],question:"Where is Anna?",qm:"¿Dónde está Anna?",options:["At home.","At school.","At work.","At the station."],correct:0},
- {title:"En una cafetería",lines:[
-  ["Good morning!","¡Buenos días!","Good morning es un saludo que usamos por la mañana."],
-  ["Good morning. Can I have a coffee, please?","Buenos días. ¿Me puede poner un café, por favor?","Can I have…? es una forma educada de pedir algo."],
-  ["Sure. Anything else?","Claro. ¿Algo más?","Anything else? pregunta si quieres alguna cosa adicional."],
-  ["No, thank you.","No, gracias.","No, thank you es una forma educada de rechazar algo más."]
- ],question:"What does the person order?",qm:"¿Qué pide la persona?",options:["A coffee.","A sandwich.","A tea.","Water."],correct:0},
- {title:"Por la mañana",lines:[
-  ["What time do you get up?","¿A qué hora te levantas?","What time…? se utiliza para preguntar la hora de una acción."],
-  ["I get up at seven.","Me levanto a las siete.","I get up at… habla de la hora habitual a la que te levantas."],
-  ["Do you have breakfast at home?","¿Desayunas en casa?","Do you…? se usa para preguntar por rutinas."],
-  ["Yes, I have breakfast at home.","Sí, desayuno en casa.","Have breakfast significa desayunar."]
- ],question:"What time does the person get up?",qm:"¿A qué hora se levanta la persona?",options:["At six.","At seven.","At eight.","At nine."],correct:1}
+ [
+  [["Anna: Hello!","Anna: ¡Hola!"],["Tom: Hi, Anna! How are you?","Tom: ¡Hola, Anna! ¿Cómo estás?"],["Anna: I'm fine, thank you.","Anna: Estoy bien, gracias."]],
+  "How is Anna?","¿Cómo está Anna?",["She is fine.","She is tired.","She is angry.","She is at work."],0
+ ],
+ [
+  [["Mum: What do you want for breakfast?","Mamá: ¿Qué quieres para desayunar?"],["Sam: I want some bread and milk.","Sam: Quiero pan y leche."],["Mum: Here you are.","Mamá: Aquí tienes."]],
+  "What does Sam want?","¿Qué quiere Sam?",["Bread and milk.","Coffee and cake.","Pizza and water.","An apple."],0
+ ],
+ [
+  [["Lucy: Where is my bag?","Lucy: ¿Dónde está mi bolso?"],["Dad: It is on the chair.","Papá: Está en la silla."],["Lucy: Thank you!","Lucy: ¡Gracias!"]],
+  "Where is Lucy's bag?","¿Dónde está el bolso de Lucy?",["On the chair.","On the table.","In the car.","At school."],0
+ ],
+ [
+  [["Ben: What time do you get up?","Ben: ¿A qué hora te levantas?"],["Sara: I get up at seven.","Sara: Me levanto a las siete."],["Ben: Seven? That's early!","Ben: ¿Las siete? ¡Eso es temprano!"]],
+  "What time does Sara get up?","¿A qué hora se levanta Sara?",["At seven.","At eight.","At nine.","At six."],0
+ ],
+ [
+  [["Tom: Do you like pizza?","Tom: ¿Te gusta la pizza?"],["Anna: Yes, I love pizza.","Anna: Sí, me encanta la pizza."],["Tom: Me too!","Tom: ¡A mí también!"]],
+  "What food does Anna like?","¿Qué comida le gusta a Anna?",["Pizza.","Fish.","Rice.","Salad."],0
+ ],
+ [
+  [["Dad: Are you at home?","Papá: ¿Estás en casa?"],["Paul: Yes, I am in my room.","Paul: Sí, estoy en mi habitación."],["Dad: OK. Dinner is ready.","Papá: Vale. La cena está lista."]],
+  "Where is Paul?","¿Dónde está Paul?",["In his room.","At school.","In the kitchen.","At the park."],0
+ ],
+ [
+  [["Shop assistant: Can I help you?","Dependiente: ¿Puedo ayudarte?"],["Emma: Yes, please. I want a blue shirt.","Emma: Sí, por favor. Quiero una camisa azul."],["Shop assistant: Here you are.","Dependiente: Aquí tienes."]],
+  "What does Emma want?","¿Qué quiere Emma?",["A blue shirt.","A red dress.","Black shoes.","A green bag."],0
+ ],
+ [
+  [["Mike: What's the weather like?","Mike: ¿Qué tiempo hace?"],["Lucy: It's sunny today.","Lucy: Hoy hace sol."],["Mike: Great! Let's go outside.","Mike: ¡Genial! Vamos fuera."]],
+  "What is the weather like?","¿Qué tiempo hace?",["Sunny.","Rainy.","Snowy.","Windy."],0
+ ],
+ [
+  [["Teacher: What's your name?","Profesor: ¿Cómo te llamas?"],["Jack: My name is Jack.","Jack: Me llamo Jack."],["Teacher: Nice to meet you, Jack.","Profesor: Encantado de conocerte, Jack."]],
+  "What is the boy's name?","¿Cómo se llama el chico?",["Jack.","John.","James.","Tom."],0
+ ],
+ [
+  [["Anna: Are you hungry?","Anna: ¿Tienes hambre?"],["Ben: Yes, I am.","Ben: Sí."],["Anna: Let's have lunch.","Anna: Vamos a comer."],],
+  "Is Ben hungry?","¿Tiene hambre Ben?",["Yes.","No.","He is thirsty.","We don't know."],0
+ ]
 ],
 A2:[
- {title:"En una tienda",lines:[
-  ["Excuse me, I'm looking for a jacket.","Perdone, estoy buscando una chaqueta.","I'm looking for… se usa para decir qué estás intentando encontrar."],
-  ["What size do you need?","¿Qué talla necesita?","What size…? pregunta por la talla de una prenda."],
-  ["Medium, please.","Mediana, por favor.","Medium es una talla habitual para ropa."],
-  ["Here you are. Would you like to try it on?","Aquí tiene. ¿Se la quiere probar?","Would you like to…? ofrece algo de forma educada."],
-  ["Yes, please.","Sí, por favor.","Yes, please acepta una oferta de manera educada."]
- ],question:"What size does the customer need?",qm:"¿Qué talla necesita el cliente?",options:["Small.","Medium.","Large.","Extra large."],correct:1},
- {title:"Planes para el fin de semana",lines:[
-  ["What are you doing this weekend?","¿Qué vas a hacer este fin de semana?","What are you doing…? puede preguntar por planes ya previstos."],
-  ["I'm going to visit my parents.","Voy a visitar a mis padres.","Be going to + verbo se usa para hablar de planes o intenciones."],
-  ["Are you staying there on Saturday night?","¿Te vas a quedar allí el sábado por la noche?","Are you…? pregunta por un plan o situación concreta."],
-  ["Yes, I'll stay until Sunday.","Sí, me quedaré hasta el domingo.","Until significa hasta y marca el momento final de una acción."]
- ],question:"Who is the person going to visit?",qm:"¿A quién va a visitar la persona?",options:["Friends.","Colleagues.","Parents.","Neighbours."],correct:2},
- {title:"En la estación",lines:[
-  ["Excuse me, which train goes to Manchester?","Perdone, ¿qué tren va a Manchester?","Which train…? sirve para pedir información concreta sobre un tren."],
-  ["The next train leaves from platform three.","El próximo tren sale del andén tres.","Leaves from indica desde qué lugar sale un transporte."],
-  ["What time does it leave?","¿A qué hora sale?","What time does it leave? pregunta por la hora de salida."],
-  ["At ten fifteen.","A las diez y cuarto.","At se usa para indicar una hora concreta."]
- ],question:"Which platform does the train leave from?",qm:"¿De qué andén sale el tren?",options:["Platform one.","Platform two.","Platform three.","Platform four."],correct:2}
+ [
+  [["Clara: What did you do yesterday?","Clara: ¿Qué hiciste ayer?"],["Mark: I went to the cinema with my brother.","Mark: Fui al cine con mi hermano."],["Clara: Did you enjoy the film?","Clara: ¿Te gustó la película?"],["Mark: Yes, it was really good.","Mark: Sí, estuvo muy bien."]],
+  "Where did Mark go?","¿Adónde fue Mark?",["To the cinema.","To the restaurant.","To the gym.","To the station."],0
+ ],
+ [
+  [["Laura: How often do you exercise?","Laura: ¿Con qué frecuencia haces ejercicio?"],["David: I usually go running twice a week.","David: Normalmente salgo a correr dos veces por semana."],["Laura: That's good. I should exercise more.","Laura: Está bien. Debería hacer más ejercicio."]],
+  "How often does David run?","¿Con qué frecuencia corre David?",["Twice a week.","Every day.","Once a month.","Three times a day."],0
+ ],
+ [
+  [["Customer: Excuse me, how much is this jacket?","Cliente: Disculpe, ¿cuánto cuesta esta chaqueta?"],["Assistant: It's forty euros.","Dependiente: Cuesta cuarenta euros."],["Customer: That's a little expensive.","Cliente: Es un poco cara."],["Assistant: We have a cheaper one over there.","Dependiente: Tenemos una más barata allí."]],
+  "How much is the jacket?","¿Cuánto cuesta la chaqueta?",["Forty euros.","Fourteen euros.","Thirty euros.","Fifty euros."],0
+ ],
+ [
+  [["Waiter: Are you ready to order?","Camarero: ¿Está listo para pedir?"],["Customer: Yes. I'd like the chicken, please.","Cliente: Sí. Quisiera el pollo, por favor."],["Waiter: Would you like anything to drink?","Camarero: ¿Quiere algo de beber?"],["Customer: Just some water, please.","Cliente: Solo un poco de agua, por favor."]],
+  "What does the customer order to drink?","¿Qué pide para beber?",["Water.","Coffee.","Juice.","Tea."],0
+ ],
+ [
+  [["Sofia: What are you going to do this weekend?","Sofía: ¿Qué vas a hacer este fin de semana?"],["Alex: I'm going to visit my grandparents.","Alex: Voy a visitar a mis abuelos."],["Sofia: Are you staying there all weekend?","Sofía: ¿Te vas a quedar allí todo el fin de semana?"],["Alex: No, I'm coming back on Sunday.","Alex: No, vuelvo el domingo."]],
+  "Who is Alex going to visit?","¿A quién va a visitar Alex?",["His grandparents.","His friends.","His teachers.","His cousins."],0
+ ],
+ [
+  [["Marta: Have you ever been to London?","Marta: ¿Has estado alguna vez en Londres?"],["Luis: Yes, I've been there twice.","Luis: Sí, he estado allí dos veces."],["Marta: Did you like it?","Marta: ¿Te gustó?"],["Luis: Yes, especially the museums.","Luis: Sí, especialmente los museos."]],
+  "How many times has Luis been to London?","¿Cuántas veces ha estado Luis en Londres?",["Twice.","Once.","Three times.","Never."],0
+ ],
+ [
+  [["Nina: Excuse me, where's the station?","Nina: Disculpe, ¿dónde está la estación?"],["Man: Go straight ahead and turn left.","Hombre: Siga recto y gire a la izquierda."],["Nina: Is it far?","Nina: ¿Está lejos?"],["Man: No, it's about five minutes on foot.","Hombre: No, está a unos cinco minutos andando."]],
+  "How long does it take to walk there?","¿Cuánto se tarda en llegar andando?",["About five minutes.","About ten minutes.","About twenty minutes.","About one hour."],0
+ ],
+ [
+  [["Emma: I don't feel very well today.","Emma: Hoy no me encuentro muy bien."],["Jack: What's wrong?","Jack: ¿Qué te pasa?"],["Emma: I have a headache.","Emma: Me duele la cabeza."],["Jack: You should get some rest.","Jack: Deberías descansar."]],
+  "What is wrong with Emma?","¿Qué le pasa a Emma?",["She has a headache.","She has a cold.","She has a broken leg.","She is hungry."],0
+ ],
+ [
+  [["Teacher: Why were you late?","Profesor: ¿Por qué llegaste tarde?"],["Student: The bus was delayed.","Alumno: El autobús se retrasó."],["Teacher: How long did you wait?","Profesor: ¿Cuánto esperaste?"],["Student: About twenty minutes.","Alumno: Unos veinte minutos."]],
+  "Why was the student late?","¿Por qué llegó tarde el alumno?",["The bus was delayed.","He missed the train.","He overslept.","It was raining."],0
+ ],
+ [
+  [["Paul: Which phone would you choose?","Paul: ¿Qué teléfono elegirías?"],["Sara: I'd choose the cheaper one.","Sara: Elegiría el más barato."],["Paul: Why?","Paul: ¿Por qué?"],["Sara: I don't need all those extra features.","Sara: No necesito todas esas funciones adicionales."]],
+  "Which phone would Sara choose?","¿Qué teléfono elegiría Sara?",["The cheaper one.","The newest one.","The most expensive one.","She doesn't know."],0
+ ]
 ],
 B1:[
- {title:"Un cambio de planes",lines:[
-  ["Are we still meeting at six?","¿Seguimos quedando a las seis?","Are we still…? pregunta si un plan continúa vigente."],
-  ["I'm afraid I can't make it at six.","Me temo que no puedo llegar a las seis.","I can't make it significa que no puedo asistir o llegar a tiempo."],
-  ["No problem. What time would suit you?","No hay problema. ¿Qué hora te vendría bien?","What time would suit you? pregunta qué hora resulta conveniente para la otra persona."],
-  ["Seven would be better for me.","Las siete me vendrían mejor.","Would be better expresa una preferencia de forma natural."],
-  ["Okay, let's meet at seven then.","Vale, entonces quedemos a las siete.","Let's… propone hacer algo juntos y then significa entonces."]
- ],question:"Why is the meeting time changed?",qm:"¿Por qué cambia la hora de la reunión?",options:["One person is working late.","One person can't make six o'clock.","The restaurant is closed.","The train is delayed."],correct:1},
- {title:"Un problema en el aeropuerto",lines:[
-  ["I'm afraid our flight has been cancelled.","Me temo que nuestro vuelo ha sido cancelado.","Has been cancelled es una forma pasiva en presente perfecto."],
-  ["Oh, no. Do you know what our options are?","Oh, no. ¿Sabes cuáles son nuestras opciones?","What our options are es una forma indirecta de preguntar por las alternativas."],
-  ["We could take the evening flight.","Podríamos coger el vuelo de la tarde.","Could se usa aquí para proponer una posibilidad."],
-  ["How much longer would we have to wait?","¿Cuánto más tendríamos que esperar?","How much longer pregunta cuánto tiempo adicional queda por esperar."],
-  ["About three hours.","Unas tres horas.","About significa aproximadamente en este contexto."]
- ],question:"What is the problem at the airport?",qm:"¿Cuál es el problema en el aeropuerto?",options:["The luggage is missing.","The airport is closed.","The flight has been cancelled.","The train is late."],correct:2},
- {title:"Un proyecto de trabajo",lines:[
-  ["Have you finished the report yet?","¿Has terminado ya el informe?","Have you… yet? pregunta si algo ya ha ocurrido."],
-  ["Not yet. I'm still checking the figures.","Todavía no. Sigo comprobando las cifras.","Not yet significa todavía no y still indica que la acción continúa."],
-  ["Do you think you'll finish it today?","¿Crees que lo terminarás hoy?","Do you think…? introduce una pregunta sobre una opinión o previsión."],
-  ["Yes, unless something unexpected happens.","Sí, a menos que ocurra algo inesperado.","Unless significa a menos que y presenta una excepción o condición."],
-  ["Great. We need it before tomorrow's meeting.","Perfecto. Lo necesitamos antes de la reunión de mañana.","Before indica que algo debe ocurrir con anterioridad a otro momento."]
- ],question:"Why does the speaker need the report?",qm:"¿Por qué necesita el informe la persona que habla?",options:["For a meeting tomorrow.","For a meeting today.","For a trip next week.","For a client next month."],correct:0}
-]};
+ [
+  [["Anna: How was your trip?","Anna: ¿Qué tal fue tu viaje?"],["Mark: It was great, although the flight was delayed.","Mark: Fue genial, aunque el vuelo se retrasó."],["Anna: How long were you at the airport?","Anna: ¿Cuánto tiempo estuviste en el aeropuerto?"],["Mark: Nearly three hours.","Mark: Casi tres horas."],["Anna: That sounds exhausting.","Anna: Eso suena agotador."]],
+  "How long was Mark at the airport?","¿Cuánto tiempo estuvo Mark en el aeropuerto?",["Nearly three hours.","About one hour.","All day.","Two days."],0
+ ],
+ [
+  [["Tom: What do you think about the new project?","Tom: ¿Qué opinas del nuevo proyecto?"],["Lisa: I think it's a good idea, but we need more time.","Lisa: Creo que es una buena idea, pero necesitamos más tiempo."],["Tom: I agree. The deadline is quite tight.","Tom: Estoy de acuerdo. El plazo es bastante ajustado."],["Lisa: Maybe we should ask for another week.","Lisa: Quizá deberíamos pedir otra semana."]],
+  "What does Lisa think about the project?","¿Qué piensa Lisa del proyecto?",["It's a good idea.","It's impossible.","It's already finished.","It's too expensive."],0
+ ],
+ [
+  [["Manager: Can you finish the report today?","Jefe: ¿Puedes terminar el informe hoy?"],["David: I'll try, but I still need to check the figures.","David: Lo intentaré, pero todavía tengo que comprobar las cifras."],["Manager: That's fine. Accuracy is more important than speed.","Jefe: Está bien. La precisión es más importante que la velocidad."],["David: I'll send it as soon as it's ready.","David: Lo enviaré en cuanto esté listo."]],
+  "What does David still need to do?","¿Qué necesita hacer todavía David?",["Check the figures.","Write the whole report.","Call a client.","Attend a meeting."],0
+ ],
+ [
+  [["Sophie: Have you seen the new app?","Sophie: ¿Has visto la nueva aplicación?"],["James: Yes. I downloaded it yesterday.","James: Sí. Me la descargué ayer."],["Sophie: What do you think of it?","Sophie: ¿Qué te parece?"],["James: It's useful, although the interface is a little confusing.","James: Es útil, aunque la interfaz es un poco confusa."]],
+  "What does James think about the app?","¿Qué piensa James de la aplicación?",["It's useful but a little confusing.","It's completely useless.","It's too expensive.","He hasn't used it."],0
+ ],
+ [
+  [["Laura: Did you manage to catch your flight?","Laura: ¿Conseguiste coger el vuelo?"],["Mike: Yes, but only just. The traffic was terrible.","Mike: Sí, pero por poco. El tráfico era terrible."],["Laura: What time did you arrive?","Laura: ¿A qué hora llegaste?"],["Mike: Ten minutes before boarding ended.","Mike: Diez minutos antes de que terminara el embarque."],["Laura: That was close!","Laura: ¡Por poco!"]],
+  "Why was Mike almost late?","¿Por qué Mike llegó casi tarde?",["The traffic was terrible.","The flight was cancelled.","He forgot his passport.","The airport was closed."],0
+ ],
+ [
+  [["Doctor: How have you been feeling?","Médico: ¿Cómo te has estado sintiendo?"],["Patient: I've been feeling tired for a few days.","Paciente: Llevo varios días sintiéndome cansado."],["Doctor: Are you sleeping well?","Médico: ¿Duermes bien?"],["Patient: Not really. I've been working late recently.","Paciente: No mucho. Últimamente he estado trabajando hasta tarde."],["Doctor: You should try to get more rest.","Médico: Deberías intentar descansar más."]],
+  "Why has the patient been tired?","¿Por qué ha estado cansado el paciente?",["He has been working late.","He has been travelling.","He is ill with a fever.","He has been exercising."],0
+ ],
+ [
+  [["Alice: Are you going to the meeting tomorrow?","Alice: ¿Vas a ir a la reunión mañana?"],["Ben: I might, but I'm waiting for confirmation.","Ben: Puede que sí, pero estoy esperando confirmación."],["Alice: If you go, could you take some notes?","Alice: Si vas, ¿podrías tomar algunas notas?"],["Ben: Sure, no problem.","Ben: Claro, no hay problema."]],
+  "What is Ben waiting for?","¿Qué está esperando Ben?",["Confirmation.","A taxi.","A report.","A phone call."],0
+ ],
+ [
+  [["Chris: What would you do if you had more free time?","Chris: ¿Qué harías si tuvieras más tiempo libre?"],["Maria: I'd travel more and learn new things.","Maria: Viajaría más y aprendería cosas nuevas."],["Chris: Where would you go first?","Chris: ¿Adónde irías primero?"],["Maria: Probably Japan. I've always wanted to go there.","Maria: Probablemente a Japón. Siempre he querido ir allí."]],
+  "Where would Maria probably go first?","¿Adónde iría probablemente Maria primero?",["Japan.","Italy.","Canada.","Australia."],0
+ ],
+ [
+  [["Peter: Did you hear about the changes at work?","Peter: ¿Has oído hablar de los cambios en el trabajo?"],["Kate: Yes. Apparently, we're going to work remotely twice a week.","Kate: Sí. Al parecer, vamos a trabajar a distancia dos días a la semana."],["Peter: Really? I think that could save us a lot of time.","Peter: ¿De verdad? Creo que eso podría ahorrarnos mucho tiempo."],["Kate: I agree, although I'll miss seeing everyone.","Kate: Estoy de acuerdo, aunque echaré de menos ver a todos."]],
+  "How often will they work remotely?","¿Con qué frecuencia trabajarán a distancia?",["Twice a week.","Every day.","Once a week.","Once a month."],0
+ ],
+ [
+  [["Emma: Why are you learning English?","Emma: ¿Por qué estás aprendiendo inglés?"],["Daniel: I need it for work, but I also want to travel more comfortably.","Daniel: Lo necesito para el trabajo, pero también quiero viajar con más comodidad."],["Emma: Are you enjoying the course?","Emma: ¿Estás disfrutando del curso?"],["Daniel: Yes. It's challenging, but I can already notice some progress.","Daniel: Sí. Es difícil, pero ya puedo notar algunos progresos."]],
+  "Why does Daniel need English?","¿Por qué necesita Daniel el inglés?",["For work and travelling.","Only for school.","For a new hobby.","To move house."],0
+ ]
+]
+};
 
-let listeningConversationIndex=0;
-let listeningConversationSet=[];
-let listeningConversationAnswered=false;
-
-function showListeningGame(){
- const pool=listeningConversations[activeCourse]||listeningConversations.A1;
- if(!listeningConversationSet.length)listeningConversationSet=shuffle(pool).slice(0,3);
- const item=listeningConversationSet[listeningConversationIndex%listeningConversationSet.length];
- listeningConversationAnswered=false;
- const transcript=item.lines.map((l,i)=>`<div class="conversation-line" style="background:#fff;border-radius:12px;padding:10px 12px;margin:7px 0;display:flex;gap:8px;align-items:flex-start"><div style="flex:1"><strong>${i%2===0?'👤':'👤'} ${l[0]}</strong><div id="convHelp${i}" class="small hidden">🇪🇸 ${l[1]}<br><span>💡 ${l[2]}</span></div></div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="speech-button" onclick="speakEnglish('${esc(l[0])}')">🔊</button><button class="secondary-button" onclick="toggleConversationHelp(${i})">🇪🇸</button></div></div>`).join('');
- const opts=shuffle(item.options.map((o,i)=>({text:o,index:i})));
- gameContent.innerHTML=`${gameHeader("🎧 ¿Qué has entendido?","Escucha una conversación en inglés y comprueba cuánto has entendido.")}<div class="listen-box"><div class="course-badge">🎧 Comprensión auditiva · ${activeCourse}</div><h3>${item.title}</h3><button class="main-button" onclick="playConversation()">▶️ ESCUCHAR CONVERSACIÓN</button><button class="speech-button" onclick="playConversation()">🔁 REPETIR</button><p class="small">Puedes escucharla todas las veces que quieras antes de responder.</p></div><div class="answers">${opts.map(x=>`<button class="answer" onclick="answerConversation(${x.index})">${x.text}</button>`).join('')}</div><div id="listeningFeedback"></div><div style="margin-top:16px"><button class="secondary-button" onclick="toggleConversationTranscript()">📖 VER / OCULTAR CONVERSACIÓN</button><div id="conversationTranscript" class="hidden" style="margin-top:12px;text-align:left">${transcript}</div></div>`;
- setTimeout(playConversation,300);
+// Repite el bloque de conversaciones de forma gradual para los 20 niveles.
+// Los niveles iniciales usan diálogos sencillos; los superiores conservan el estilo
+// del curso pero cambian la selección para evitar que el ejercicio sea siempre igual.
+function getListeningConversation(levelIndex){
+  const bank=listeningConversations[activeCourse]||listeningConversations.A1;
+  return bank[levelIndex%bank.length];
+}
+function showConversationListeningGame(){
+  const q=getListeningConversation(currentLevel);
+  const lines=q[0], question=q[1], qMeaning=q[2], options=q[3], correct=q[4];
+  const dialogue=lines.map(x=>`<div class="conversation-line"><strong>${x[0].split(":")[0]}:</strong> ${x[0].replace(/^[^:]+:\s*/,"")}</div>`).join("");
+  gameContent.innerHTML=`${gameHeader("🎧 ¿Qué has entendido?","Escucha la conversación y responde. Puedes repetirla y pedir ayuda con cada oración.")}<div class="listen-box"><div class="course-badge">🎧 Comprensión auditiva · ${activeCourse}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="speech-button" onclick="playConversation()">▶️ ESCUCHAR CONVERSACIÓN</button><button class="speech-button" onclick="playConversation()">🔁 REPETIR</button></div><div class="small" style="margin-top:8px">Primero intenta entenderla sin mirar el texto.</div></div><div class="question" style="margin-top:18px">${question}</div><div class="answers">${shuffle(options.map((o,i)=>({o,i}))).map(x=>`<button class="answer" onclick="answerConversation(${x.i})">${x.o}</button>`).join("")}</div><div id="conversationFeedback"></div><details style="margin-top:16px"><summary>📖 Ver conversación y ayudas</summary><div class="explanation" style="margin-top:12px">${lines.map((x,i)=>`<div style="padding:10px;border-bottom:1px solid #eee"><strong>🇬🇧 ${x[0]}</strong><br><button class="speech-button" style="margin-top:6px" onclick="speakEnglish('${esc(x[0])}')">🔊 Escuchar frase</button> <button class="secondary-button" onclick="explainConversationLine(${i})">❓ Traducir y explicar</button><div id="convHelp${i}"></div></div>`).join("")}</div></details>`;
+  setTimeout(playConversation,300);
 }
 function playConversation(){
- const item=listeningConversationSet[listeningConversationIndex%listeningConversationSet.length];
- if(!item)return;
- window.speechSynthesis.cancel();
- let i=0;
- const playNext=()=>{if(i>=item.lines.length)return;const utter=new SpeechSynthesisUtterance(item.lines[i][0]);utter.lang='en-GB';utter.rate=activeCourse==='A1'?0.68:(activeCourse==='A2'?0.76:0.84);utter.onend=()=>{i++;setTimeout(playNext,220)};window.speechSynthesis.speak(utter)};
- playNext();
+  const lines=getListeningConversation(currentLevel)[0];
+  if(!speechEnabled||!("speechSynthesis" in window))return;
+  window.speechSynthesis.cancel();
+  let i=0;
+  function next(){if(i>=lines.length)return;const u=new SpeechSynthesisUtterance(lines[i][0]);u.lang=englishVoice?englishVoice.lang:"en-GB";if(englishVoice)u.voice=englishVoice;u.rate=0.78;u.onend=()=>{i++;setTimeout(next,180)};window.speechSynthesis.speak(u)}
+  next();
 }
-function toggleConversationTranscript(){document.getElementById('conversationTranscript')?.classList.toggle('hidden')}
-function toggleConversationHelp(i){document.getElementById('convHelp'+i)?.classList.toggle('hidden')}
+function explainConversationLine(i){
+  const line=getListeningConversation(currentLevel)[0][i], en=line[0], es=line[1];
+  const el=document.getElementById("convHelp"+i);
+  if(!el)return;
+  el.innerHTML=`<div class="feedback" style="margin-top:10px"><strong>🇬🇧 ${en}</strong><br><strong>🇪🇸 ${es}</strong><br><br><strong>💡 Explicación</strong><br>${conversationExplanation(en)}<br><button class="speech-button" style="margin-top:8px" onclick="speakSpanish('${esc(es)}')">🔊 Escuchar en español</button> <button class="speech-button" onclick="speakEnglish('${esc(en)}')">🔊 Inglés</button></div>`;
+}
+function conversationExplanation(en){
+  if(/^How (are|is|do|does|did|often|much|long)/i.test(en))return "Es una pregunta. Fíjate en la estructura inicial: “How…” pide información concreta, como estado, frecuencia, cantidad o duración.";
+  if(/\b(I'd|would)\b/i.test(en))return "“I’d” es la forma corta de “I would” y suele utilizarse para hablar de preferencias, posibilidades o situaciones hipotéticas.";
+  if(/\b(should)\b/i.test(en))return "“Should” se usa para dar consejos o decir lo que consideramos recomendable.";
+  if(/\b(going to)\b/i.test(en))return "“Be going to” se utiliza para hablar de planes o intenciones futuras.";
+  if(/\b(have ever|I've been)\b/i.test(en))return "Esta estructura pertenece al present perfect y se usa para hablar de experiencias conectadas con el presente.";
+  return "Escucha la frase por bloques. Intenta reconocer primero quién realiza la acción y después qué acción o información se comunica.";
+}
 function answerConversation(i){
- if(listeningConversationAnswered)return;
- listeningConversationAnswered=true;
- document.querySelectorAll('#gameContent .answer').forEach(b=>b.disabled=true);
- const item=listeningConversationSet[listeningConversationIndex%listeningConversationSet.length];
- const ok=i===item.correct;
- if(ok){state.xp+=25;state.score+=25;state.streak++;}else{state.streak=0;}
- saveState();
- const correct=item.options[item.correct];
- listeningFeedback.innerHTML=`<div class="feedback ${ok?'correct':'wrong'}"><strong>${ok?'🎉 ¡Muy bien!':'❌ Vamos a repasarlo'}</strong><div class="explanation"><strong>🇬🇧 Conversación:</strong> ${item.title}<br><br><strong>❓ ${item.question}</strong><br>🇪🇸 ${item.qm}<br><br><strong>Respuesta correcta:</strong> ${correct}<br><br><strong>💡 Consejo:</strong> Si alguna frase te cuesta, abre <strong>📖 VER / OCULTAR CONVERSACIÓN</strong> y pulsa 🇪🇸 en esa oración para verla traducida y explicada. También puedes pulsar 🔊 para escuchar solo esa frase.</div><button class="speech-button" onclick="playConversation()">🔁 REPETIR CONVERSACIÓN</button></div><button class="main-button" onclick="acceptConversationResult()">➡️ ACEPTAR Y CONTINUAR</button>`;
+  const q=getListeningConversation(currentLevel);
+  document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);
+  const ok=i===q[4];
+  if(ok){state.xp+=25;state.score+=25;state.streak++;}else state.streak=0;
+  saveState();
+  conversationFeedback.innerHTML=`<div class="feedback ${ok?'correct':'wrong'}"><strong>${ok?'🎉 ¡Muy bien! Has entendido la conversación.':'❌ Vamos a repasarla'}</strong><div class="explanation"><strong>🇪🇸 Pregunta:</strong> ${q[2]}<br><br><strong>✅ Respuesta:</strong> ${q[3][q[4]]}</div></div><button class="main-button" onclick="acceptConversation()">➡️ ACEPTAR Y CONTINUAR</button>`;
+  if(ok)playConversation();
 }
-function acceptConversationResult(){
- listeningConversationIndex++;
- if(listeningConversationIndex>=listeningConversationSet.length){listeningConversationSet=[];listeningConversationIndex=0;currentQuestion=0;currentGame++;nextGame();}
- else showListeningGame();
+function acceptConversation(){
+  currentQuestion++;
+  if(currentQuestion>=2){currentQuestion=0;currentGame++;nextGame();}
+  else showConversationListeningGame();
 }
-function nextGame(){
- gameContent.innerHTML="";
- listeningConversationSet=listeningConversationSet||[];
- if(currentGame===0)showVocabularyGame();
- else if(currentGame===1)showMemoryGame();
- else if(currentGame===2)showQuizGame();
- else if(currentGame===3)showSentenceGame();
- else if(currentGame===4)showResponseGame();
- else if(currentGame===5)showRealSituations();
- else if(currentGame===6)showListeningGame();
- else completeLevel();
-}
-function gameHeader(title,text){const total=activeCourse==="B1"?7:7;return `<div class="center"><div class="small">NIVEL ${currentLevel+1}</div><h2>${title}</h2><p>${text}</p><div class="progress"><div class="progress-bar" style="width:${Math.min(100,currentGame/(total-1)*100)}%"></div></div></div>`}
+
+function showListeningGame(){const level=levels[currentLevel],q=level.sentences[currentQuestion%level.sentences.length],english=q.words.join(" "),pool=level.sentences.filter(x=>x!==q).map(x=>x.meaning),options=shuffle([q.meaning,...shuffle(pool).slice(0,3)]);gameContent.innerHTML=`${gameHeader("🎧 Escucha y elige","Escucha la frase en inglés y elige su significado.")}<div class="listen-box"><div class="course-badge">🎧 Comprensión auditiva</div><div class="listen-word">🔊</div><button class="speech-button" onclick="speakEnglish('${esc(english)}')">🔊 ESCUCHAR DE NUEVO</button><div class="small">Puedes escucharla tantas veces como quieras.</div></div><div class="answers">${options.map(o=>`<button class="answer" onclick="answerListening('${esc(o)}','${esc(q.meaning)}','${esc(english)}')">${o}</button>`).join("")}</div><div id="listeningFeedback"></div>`;setTimeout(()=>speakEnglish(english),250)}
+function answerListening(answer,correct,english){document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);if(answer===correct){state.xp+=20;state.score+=20;state.streak++;speakEnglish(english);listeningFeedback.innerHTML=`<div class="feedback correct">🎧 ¡Muy bien! Has entendido la frase.<br><strong>${english}</strong></div>`;saveState();setTimeout(()=>{currentQuestion++;if(currentQuestion>=4){currentQuestion=0;currentGame++;nextGame()}else showListeningGame()},1000)}else{state.streak=0;speakEnglish(english);listeningFeedback.innerHTML=`<div class="feedback wrong">❌ La respuesta correcta era:<br><strong>${correct}</strong><br><br>Puedes escucharla otra vez.</div>`;saveState();setTimeout(()=>showListeningGame(),1200)}}
 function completeLevel(){const key=completedKey(currentLevel);if(state.completedLevels.includes(key)){showLevels();return}state.completedLevels.push(key);state.xp+=100;state.score+=100;state.streak++;state.stars[key]=3;const list=courseUnlockedLevels();if(currentLevel+1<levels.length&&!list.includes(currentLevel+1)){list.push(currentLevel+1);if(activeCourse==="A2")state.unlockedLevelsA2=list;else if(activeCourse==="B1")state.unlockedLevelsB1=list;else state.unlockedLevels=list;state.currentLevel=currentLevel+1}const next=nextCourseId(activeCourse);if(courseCompleted(activeCourse)&&next&&!state.unlockedCourses.includes(next)){saveState();unlockCourse(next,`🎓 Has completado los 20 niveles de ${activeCourse}.`);return}saveState();showCelebration()}
 function showCelebration(){const next=currentLevel+1;if(next<levels.length){celebrationTitle.innerText="🎉 ¡Nivel completado!";celebrationText.innerHTML=`Has terminado <strong>${levels[currentLevel].title}</strong>.<br><br>🔓 ¡${levels[next].title} está desbloqueado!<br><br>⭐ +100 XP`}else{const nextCourse=nextCourseId(activeCourse);celebrationTitle.innerText="🏆 ¡Curso completado!";celebrationText.innerHTML=`Has completado los 20 niveles de <strong>${activeCourse}</strong>.<br><br>${nextCourse?`📝 Puedes pasar a <strong>${nextCourse}</strong> con una prueba de 15 preguntas (90%), o con la clave 1111.`:`🔒 <strong>El curso siguiente aún no está terminado.</strong>`}<br><br>⭐ +100 XP`}createConfetti();celebration.classList.add("show")}
 function closeCelebration(){celebration.classList.remove("show");if(currentLevel+1<levels.length)startLevel(currentLevel+1);else showLevels()}
