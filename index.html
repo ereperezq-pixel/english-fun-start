@@ -502,7 +502,7 @@ function repairCourseUnlocks(){
   state.unlockedLevels=lists.A1; state.unlockedLevelsA2=lists.A2; state.unlockedLevelsB1=lists.B1;
 }
 repairCourseUnlocks();
-const APP_VERSION="1.8.0";
+const APP_VERSION="1.9.0";
 function showUpdateNotice(){
   if(localStorage.getItem("englishFunLastSeenVersion")===APP_VERSION) return;
   const el=document.createElement("div");
@@ -607,7 +607,9 @@ function answerRealSituation(i){
   saveState();
   const situationMeaning=s[5]||"Significado de la situación.";
   const answerMeaning=s[6]||"Significado de la respuesta.";
-  realSituationFeedback.innerHTML=`<div class="feedback ${ok?'correct':'wrong'}"><strong>${ok?'🎉 ¡Muy bien!':'❌ Vamos a aprender de esta respuesta'}</strong><div class="explanation"><strong>🇬🇧 Situación:</strong><br>${s[1]}<br><strong>🇪🇸 Significado:</strong><br>${situationMeaning}<br><br><strong>🇬🇧 Respuesta natural:</strong><br>${answer}<br><strong>🇪🇸 Significado:</strong><br>${answerMeaning}<br><br><strong>💡 ¿Por qué?</strong><br>${s[4]}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px"><button class="speech-button" onclick="speakEnglish('${esc(s[1])}')">🔊 SITUACIÓN</button><button class="speech-button" onclick="speakEnglish('${esc(answer)}')">🔊 RESPUESTA</button></div></div><button class="main-button" onclick="acceptRealSituation()">➡️ ACEPTAR Y CONTINUAR</button>`;
+  const feedback=document.getElementById("realSituationFeedback");
+  if(!feedback)return;
+  feedback.innerHTML=`<div class="feedback ${ok?'correct':'wrong'}"><strong>${ok?'🎉 ¡Muy bien!':'❌ Vamos a aprender de esta respuesta'}</strong><div class="explanation"><strong>🇬🇧 Situación:</strong><br>${s[1]}<br><strong>🇪🇸 Significado:</strong><br>${situationMeaning}<br><br><strong>🇬🇧 Respuesta natural:</strong><br>${answer}<br><strong>🇪🇸 Significado:</strong><br>${answerMeaning}<br><br><strong>💡 ¿Por qué?</strong><br>${s[4]}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px"><button class="speech-button" onclick="speakEnglish('${esc(s[1])}')">🔊 SITUACIÓN</button><button class="speech-button" onclick="speakEnglish('${esc(answer)}')">🔊 RESPUESTA</button></div></div><button class="main-button" onclick="acceptRealSituation()">➡️ ACEPTAR Y CONTINUAR</button>`;
 }
 function acceptRealSituation(){
   state.realSituationIndex++;
