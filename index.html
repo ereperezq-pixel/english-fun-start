@@ -487,6 +487,21 @@ if(!Array.isArray(state.unlockedLevelsA2)) state.unlockedLevelsA2=[0];
 if(!Array.isArray(state.unlockedLevelsB1)) state.unlockedLevelsB1=[0];
 if(!Array.isArray(state.completedLevels)) state.completedLevels=[];
 state.completedLevels=state.completedLevels.map(x=>typeof x==="number"?`A1-${x}`:x);
+// Reparación de progreso: si un nivel ya figura como completado, el siguiente
+// queda desbloqueado aunque una versión anterior no lo hubiera guardado bien.
+function repairCourseUnlocks(){
+  const lists={A1:Array.isArray(state.unlockedLevels)?state.unlockedLevels:[0],A2:Array.isArray(state.unlockedLevelsA2)?state.unlockedLevelsA2:[0],B1:Array.isArray(state.unlockedLevelsB1)?state.unlockedLevelsB1:[0]};
+  for(const course of Object.keys(lists)){
+    const list=lists[course];
+    if(!list.includes(0))list.unshift(0);
+    for(let i=0;i<PUBLISHED_LEVELS-1;i++){
+      if(state.completedLevels.includes(`${course}-${i}`) && !list.includes(i+1))list.push(i+1);
+    }
+    list.sort((a,b)=>a-b);
+  }
+  state.unlockedLevels=lists.A1; state.unlockedLevelsA2=lists.A2; state.unlockedLevelsB1=lists.B1;
+}
+repairCourseUnlocks();
 const APP_VERSION="1.8.0";
 function showUpdateNotice(){
   if(localStorage.getItem("englishFunLastSeenVersion")===APP_VERSION) return;
