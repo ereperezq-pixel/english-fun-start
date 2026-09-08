@@ -7,6 +7,7 @@
   "background_color": "#eaf7ff",
   "theme_color": "#2575fc",
   "orientation": "portrait",
+  "categories": ["education", "games"],
   "icons": [
     {
       "src": "icon-192.png",

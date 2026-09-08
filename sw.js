@@ -1,5 +1,5 @@
-const CACHE_NAME = "english-fun-start-v18";
-const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./conversation.js"];
+const CACHE_NAME = "english-fun-start-v20";
+const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./conversation.js", "./iphone.css", "./iphone.js"];
 
 self.addEventListener("install", event => {
   event.waitUntil(

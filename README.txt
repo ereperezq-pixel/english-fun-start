@@ -6,3 +6,11 @@ La clave desbloquea el curso siguiente; no completa niveles del curso actual.
 El juego de parejas no rompe la racha general. B1 añade “Escucha y elige”.
 Si no hay siguiente curso disponible, se muestra “El curso siguiente aún no está terminado.”
 El progreso se guarda en localStorage.
+
+
+Actualización 20 — arquitectura separada iPhone/iOS:
+- index.html mantiene la lógica principal y los juegos.
+- conversation.js mantiene el juego de comprensión auditiva.
+- iphone.css contiene únicamente adaptación visual/safe-area para iPhone.
+- iphone.js contiene únicamente compatibilidad iOS y no sustituye funciones del juego.
+- Se conserva localStorage y el progreso existente.
