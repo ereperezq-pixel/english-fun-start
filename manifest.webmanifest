@@ -1,6 +1,6 @@
 {
-  "name": "English Fun Start",
-  "short_name": "English Fun",
+  "name": "Lingua Fun",
+  "short_name": "Lingua Fun",
   "description": "Aprende inglés jugando con vocabulario, memoria, quiz y frases.",
   "start_url": "./",
   "display": "standalone",
