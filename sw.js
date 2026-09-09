@@ -1,4 +1,4 @@
-const CACHE_NAME = "lingua-fun-v40-games";
+const CACHE_NAME = "lingua-fun-v39-sequence-fixed";
 const APP_SHELL = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./conversation.js","./rewards.js","./iphone.css","./iphone.js","./word-help.js","./multilingual-word-help.js","./word-help.css","./language-selector.js","./language-selector.css","./frances.html","./frances.js","./frances.css","./italiano.html","./italiano.js","./italiano-a2.js","./italiano-b1.js","./italiano.css","./frances.html","./frances.js","./frances.css","./level-games.js","./extra-games.js","./extra-games.css"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

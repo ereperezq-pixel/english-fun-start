@@ -5,18 +5,76 @@
 'use strict';
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function speak(l,t){if(!t)return;if(l==='fr'&&window.speakFrench)window.speakFrench(t);else if(l==='it'&&window.speakItalian)window.speakItalian(t)}
-function host(l,title,body,step){const cls=l==='fr'?'fr-card':'it-card';document.getElementById('app').innerHTML=`<div class="${cls} extra-game-card required-practice-sequence"><div class="it-top"><span>🎮 Práctica del nivel</span><b>${title}</b></div><div class="sequence-step">Juego ${step} de 6</div>${body}</div>`}
-function finish(done){if(typeof done==='function')done()}
+function host(l,title,body,step){const cls=l==='fr'?'fr-card':'it-card';document.getElementById('app').innerHTML=`<div data-required-sequence="true" class="${cls} extra-game-card required-practice-sequence"><div class="it-top"><span>🎮 Práctica del nivel</span><b>${title}</b></div><div class="sequence-step">Juego ${step} de 6</div>${body}</div>`}
+function finish(done){ if(typeof done!=='function') return; try{ done(); }catch(e){ console.error('Error al continuar la secuencia:',e); } }
 function pairs(l,data,done){
- const items=shuffle(data).slice(0,4),cards=shuffle(items.flatMap((x,i)=>[{id:i,text:x.term,type:0},{id:i,text:x.es,type:1}]));
- host(l,'🧩 Encuentra las parejas',`<p>Une cada palabra con su significado.</p><div class="extra-pairs">${cards.map((x,i)=>`<button class="extra-pair" data-i="${i}">${x.term||x.text}</button>`).join('')}</div><div id="pf" class="extra-feedback"></div>`,2);
- const bs=[...document.querySelectorAll('.extra-pair')];let sel=[],okn=0;
- bs.forEach((b,i)=>b.onclick=()=>{if(b.disabled)return;b.classList.add('revealed');speak(l,cards[i].text);sel.push({b,c:cards[i]});if(sel.length===2){const[a,z]=sel;const ok=a.c.id===z.c.id&&a.c.type!==z.c.type;if(ok){a.b.classList.add('matched');z.b.classList.add('matched');a.b.disabled=z.b.disabled=true;okn++;document.getElementById('pf').innerHTML=okn===4?'🎉 ¡Has encontrado todas las parejas!':'✅ ¡Pareja correcta!';if(okn===4)setTimeout(()=>finish(done),900)}else{document.getElementById('pf').innerHTML='❌ No coinciden. ¡Sigue intentándolo!';setTimeout(()=>sel.forEach(q=>q.b.classList.remove('revealed')),700)}sel=[]}})
+ const items=shuffle(data).slice(0,4);
+ const cards=shuffle(items.flatMap((x,i)=>[
+   {id:i,text:x.term,type:0},
+   {id:i,text:x.es,type:1}
+ ]));
+ const total=items.length;
+ host(l,'🧩 Encuentra las parejas',`<p>Une cada palabra con su significado.</p><div class="extra-pairs">${cards.map((x,i)=>`<button type="button" class="extra-pair" data-i="${i}">${x.text}</button>`).join('')}</div><div id="pf" class="extra-feedback"></div>`,2);
+ const bs=[...document.querySelectorAll('.extra-pair')];
+ let sel=[],okn=0,advancing=false;
+ function advance(){
+   if(advancing)return;
+   advancing=true;
+   bs.forEach(b=>b.disabled=true);
+   const fb=document.getElementById('pf');
+   if(fb)fb.innerHTML='🎉 ¡Has encontrado todas las parejas!<br><span class="extra-small">Siguiente juego…</span>';
+   setTimeout(()=>finish(done),900);
+ }
+ bs.forEach((b,i)=>b.addEventListener('click',()=>{
+   if(advancing||b.disabled)return;
+   b.classList.add('revealed');
+   speak(l,cards[i].text);
+   sel.push({b,c:cards[i]});
+   if(sel.length!==2)return;
+   const a=sel[0],z=sel[1];
+   sel=[];
+   const ok=a.c.id===z.c.id&&a.c.type!==z.c.type;
+   if(ok){
+     a.b.classList.add('matched');z.b.classList.add('matched');
+     a.b.disabled=true;z.b.disabled=true;okn++;
+     const fb=document.getElementById('pf');
+     if(fb)fb.innerHTML=okn>=total?'🎉 ¡Has encontrado todas las parejas!':'✅ ¡Pareja correcta!';
+     if(okn>=total)advance();
+   }else{
+     const fb=document.getElementById('pf');
+     if(fb)fb.innerHTML='❌ No coinciden. ¡Sigue intentándolo!';
+     setTimeout(()=>{
+       if(advancing)return;
+       a.b.classList.remove('revealed');z.b.classList.remove('revealed');
+     },700);
+   }
+ }));
 }
-function listen(l,data,done){const items=shuffle(data).slice(0,4);let i=0;function r(){const x=items[i],opts=shuffle([x.es,...shuffle(data.filter(y=>y!==x).map(y=>y.es)).slice(0,3)]);host(l,'🎧 Escucha y elige',`<p>Escucha la frase y elige su significado.</p><button class="extra-game-btn" id="lp">🔊 Escuchar frase</button><div class="extra-game-answers">${opts.map(o=>`<button>${o}</button>`).join('')}</div><div id="lf" class="extra-feedback"></div><p class="extra-small">Pregunta ${i+1} de 4</p>`,3);document.getElementById('lp').onclick=()=>speak(l,x.sentence||x.term);setTimeout(()=>speak(l,x.sentence||x.term),150);document.querySelectorAll('.extra-game-answers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.extra-game-answers button').forEach(q=>q.disabled=true);const good=b.textContent===x.es;document.getElementById('lf').innerHTML=good?`✅ Correcto<br><b>${x.sentence||x.term}</b><br>🇪🇸 ${x.sentenceEs||x.es}`:`❌ Correcto: <b>${x.es}</b><br>${x.sentence||x.term}`;speak(l,x.sentence||x.term);setTimeout(()=>{i++;i<4?r():finish(done)},1800)})}r()}
-function order(l,data,done){const items=shuffle(data.filter(x=>x.sentence||x.term)).slice(0,4);let i=0;function r(){const x=items[i],sent=x.sentence||x.term,clean=sent.replace(/[¿?¡!.,]/g,'').split(/\s+/),chosen=[];host(l,'🔤 Ordena la frase',`<p>Forma la frase correcta.</p><div id="oc" class="extra-current">Toca las palabras en orden.</div><div class="extra-order">${shuffle(clean).map(w=>`<button class="extra-token">${w}</button>`).join('')}</div><button class="extra-game-btn" id="ocheck">Comprobar</button><div id="of" class="extra-feedback"></div><p class="extra-small">Frase ${i+1} de 4</p>`,4);document.querySelectorAll('.extra-token').forEach(b=>b.onclick=()=>{if(b.disabled)return;b.disabled=true;chosen.push(b.textContent);document.getElementById('oc').textContent=chosen.join(' ')});document.getElementById('ocheck').onclick=()=>{const good=chosen.join(' ')===clean.join(' ');document.querySelectorAll('.extra-token').forEach(q=>q.disabled=true);document.getElementById('ocheck').disabled=true;document.getElementById('of').innerHTML=good?`✅ ¡Muy bien!<br>${sent}<br>🇪🇸 ${x.sentenceEs||x.es}`:`❌ Orden correcto:<br><b>${sent}</b><br>🇪🇸 ${x.sentenceEs||x.es}`;speak(l,sent);setTimeout(()=>{i++;i<4?r():finish(done)},1800)}}r()}
-function response(l,data,done){const items=shuffle(data).slice(0,4);let i=0;function r(){const x=items[i],correct=x.sentence||x.term,opts=shuffle([correct,...shuffle(data.filter(y=>y!==x).map(y=>y.sentence||y.term)).slice(0,3)]);host(l,'💬 ¿Qué responderías?',`<p>Estás en una situación cotidiana. ¿Qué frase usarías?</p><h2>🇪🇸 ${x.sentenceEs||x.es}</h2><div class="extra-game-answers">${opts.map(o=>`<button>${o}</button>`).join('')}</div><div id="rf" class="extra-feedback"></div><p class="extra-small">Situación ${i+1} de 4</p>`,5);document.querySelectorAll('.extra-game-answers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.extra-game-answers button').forEach(q=>q.disabled=true);const good=b.textContent===correct;document.getElementById('rf').innerHTML=good?`✅ Respuesta natural.<br><b>${correct}</b><br>🇪🇸 ${x.sentenceEs||x.es}`:`❌ Una respuesta natural sería:<br><b>${correct}</b><br>🇪🇸 ${x.sentenceEs||x.es}`;speak(l,correct);setTimeout(()=>{i++;i<4?r():finish(done)},1800)})}r()}
-function situation(l,data,done){const items=shuffle(data).slice(0,4);let i=0;function r(){const x=items[i],correct=x.sentence||x.term,opts=shuffle([correct,...shuffle(data.filter(y=>y!==x).map(y=>y.sentence||y.term)).slice(0,3)]);host(l,'🎭 Situación real',`<p><b>Situación:</b> necesitas expresar correctamente esta idea:</p><h2>🇪🇸 ${x.sentenceEs||x.es}</h2><div class="extra-game-answers">${opts.map(o=>`<button>${o}</button>`).join('')}</div><div id="sf" class="extra-feedback"></div><p class="extra-small">Situación ${i+1} de 4</p>`,6);document.querySelectorAll('.extra-game-answers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.extra-game-answers button').forEach(q=>q.disabled=true);const good=b.textContent===correct;document.getElementById('sf').innerHTML=good?`✅ ¡Correcto!<br><b>${correct}</b>`:`❌ Respuesta correcta:<br><b>${correct}</b>`;speak(l,correct);setTimeout(()=>{i++;i<4?r():finish(done)},1800)})}r()}
-function meaning(l,data,done){const items=shuffle(data).slice(0,4);let i=0;function r(){const x=items[i],opts=shuffle([x.es,...shuffle(data.filter(y=>y!==x).map(y=>y.es)).slice(0,3)]);host(l,'🧠 ¿Qué palabra es?',`<p>Escucha la palabra y elige su significado.</p><h2>${x.term}</h2><button class="extra-game-btn" id="mp">🔊 Escuchar</button><div class="extra-game-answers">${opts.map(o=>`<button>${o}</button>`).join('')}</div><div id="mf" class="extra-feedback"></div><p class="extra-small">Pregunta ${i+1} de 4</p>`,7);document.getElementById('mp').onclick=()=>speak(l,x.term);setTimeout(()=>speak(l,x.term),120);document.querySelectorAll('.extra-game-answers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.extra-game-answers button').forEach(q=>q.disabled=true);const good=b.textContent===x.es;document.getElementById('mf').innerHTML=good?`✅ Correcto<br><b>${x.term}</b> = ${x.es}`:`❌ Correcto: <b>${x.es}</b>`;setTimeout(()=>{i++;i<4?r():finish(done)},1800)})}r()}
-window.runPracticeSequence=function(l,data,done){pairs(l,data,()=>listen(l,data,()=>order(l,data,()=>response(l,data,()=>situation(l,data,()=>meaning(l,data,done))))))};
+
+function listen(l,data,done){const items=shuffle(data).slice(0,Math.min(4,data.length));let i=0;if(!items.length){finish(done);return}function r(){const x=items[i],opts=shuffle([x.es,...shuffle(data.filter(y=>y!==x).map(y=>y.es)).slice(0,3)]);host(l,'🎧 Escucha y elige',`<p>Escucha la frase y elige su significado.</p><button class="extra-game-btn" id="lp">🔊 Escuchar frase</button><div class="extra-game-answers">${opts.map(o=>`<button>${o}</button>`).join('')}</div><div id="lf" class="extra-feedback"></div><p class="extra-small">Pregunta ${i+1} de 4</p>`,3);document.getElementById('lp').onclick=()=>speak(l,x.sentence||x.term);setTimeout(()=>speak(l,x.sentence||x.term),150);document.querySelectorAll('.extra-game-answers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.extra-game-answers button').forEach(q=>q.disabled=true);const good=b.textContent===x.es;document.getElementById('lf').innerHTML=good?`✅ Correcto<br><b>${x.sentence||x.term}</b><br>🇪🇸 ${x.sentenceEs||x.es}`:`❌ Correcto: <b>${x.es}</b><br>${x.sentence||x.term}`;speak(l,x.sentence||x.term);setTimeout(()=>{i++;i<4?r():finish(done)},1800)})}r()}
+function order(l,data,done){const items=shuffle(data.filter(x=>x.sentence||x.term)).slice(0,Math.min(4,data.length));let i=0;if(!items.length){finish(done);return}function r(){const x=items[i],sent=x.sentence||x.term,clean=sent.replace(/[¿?¡!.,]/g,'').split(/\s+/),chosen=[];host(l,'🔤 Ordena la frase',`<p>Forma la frase correcta.</p><div id="oc" class="extra-current">Toca las palabras en orden.</div><div class="extra-order">${shuffle(clean).map(w=>`<button class="extra-token">${w}</button>`).join('')}</div><button class="extra-game-btn" id="ocheck">Comprobar</button><div id="of" class="extra-feedback"></div><p class="extra-small">Frase ${i+1} de 4</p>`,4);document.querySelectorAll('.extra-token').forEach(b=>b.onclick=()=>{if(b.disabled)return;b.disabled=true;chosen.push(b.textContent);document.getElementById('oc').textContent=chosen.join(' ')});document.getElementById('ocheck').onclick=()=>{const good=chosen.join(' ')===clean.join(' ');document.querySelectorAll('.extra-token').forEach(q=>q.disabled=true);document.getElementById('ocheck').disabled=true;document.getElementById('of').innerHTML=good?`✅ ¡Muy bien!<br>${sent}<br>🇪🇸 ${x.sentenceEs||x.es}`:`❌ Orden correcto:<br><b>${sent}</b><br>🇪🇸 ${x.sentenceEs||x.es}`;speak(l,sent);setTimeout(()=>{i++;i<4?r():finish(done)},1800)}}r()}
+function response(l,data,done){const items=shuffle(data).slice(0,Math.min(4,data.length));let i=0;if(!items.length){finish(done);return}function r(){const x=items[i],correct=x.sentence||x.term,opts=shuffle([correct,...shuffle(data.filter(y=>y!==x).map(y=>y.sentence||y.term)).slice(0,3)]);host(l,'💬 ¿Qué responderías?',`<p>Estás en una situación cotidiana. ¿Qué frase usarías?</p><h2>🇪🇸 ${x.sentenceEs||x.es}</h2><div class="extra-game-answers">${opts.map(o=>`<button>${o}</button>`).join('')}</div><div id="rf" class="extra-feedback"></div><p class="extra-small">Situación ${i+1} de 4</p>`,5);document.querySelectorAll('.extra-game-answers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.extra-game-answers button').forEach(q=>q.disabled=true);const good=b.textContent===correct;document.getElementById('rf').innerHTML=good?`✅ Respuesta natural.<br><b>${correct}</b><br>🇪🇸 ${x.sentenceEs||x.es}`:`❌ Una respuesta natural sería:<br><b>${correct}</b><br>🇪🇸 ${x.sentenceEs||x.es}`;speak(l,correct);setTimeout(()=>{i++;i<4?r():finish(done)},1800)})}r()}
+function situation(l,data,done){const items=shuffle(data).slice(0,Math.min(4,data.length));let i=0;if(!items.length){finish(done);return}function r(){const x=items[i],correct=x.sentence||x.term,opts=shuffle([correct,...shuffle(data.filter(y=>y!==x).map(y=>y.sentence||y.term)).slice(0,3)]);host(l,'🎭 Situación real',`<p><b>Situación:</b> necesitas expresar correctamente esta idea:</p><h2>🇪🇸 ${x.sentenceEs||x.es}</h2><div class="extra-game-answers">${opts.map(o=>`<button>${o}</button>`).join('')}</div><div id="sf" class="extra-feedback"></div><p class="extra-small">Situación ${i+1} de 4</p>`,6);document.querySelectorAll('.extra-game-answers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.extra-game-answers button').forEach(q=>q.disabled=true);const good=b.textContent===correct;document.getElementById('sf').innerHTML=good?`✅ ¡Correcto!<br><b>${correct}</b>`:`❌ Respuesta correcta:<br><b>${correct}</b>`;speak(l,correct);setTimeout(()=>{i++;i<4?r():finish(done)},1800)})}r()}
+function meaning(l,data,done){const items=shuffle(data).slice(0,Math.min(4,data.length));let i=0;if(!items.length){finish(done);return}function r(){const x=items[i],opts=shuffle([x.es,...shuffle(data.filter(y=>y!==x).map(y=>y.es)).slice(0,3)]);host(l,'🧠 ¿Qué palabra es?',`<p>Escucha la palabra y elige su significado.</p><h2>${x.term}</h2><button class="extra-game-btn" id="mp">🔊 Escuchar</button><div class="extra-game-answers">${opts.map(o=>`<button>${o}</button>`).join('')}</div><div id="mf" class="extra-feedback"></div><p class="extra-small">Pregunta ${i+1} de 4</p>`,7);document.getElementById('mp').onclick=()=>speak(l,x.term);setTimeout(()=>speak(l,x.term),120);document.querySelectorAll('.extra-game-answers button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.extra-game-answers button').forEach(q=>q.disabled=true);const good=b.textContent===x.es;document.getElementById('mf').innerHTML=good?`✅ Correcto<br><b>${x.term}</b> = ${x.es}`:`❌ Correcto: <b>${x.es}</b>`;setTimeout(()=>{i++;i<4?r():finish(done)},1800)})}r()}
+window.runPracticeSequence=function(l,data,done){
+  // La secuencia es obligatoria y ocurre sin volver al mapa.
+  const stages=[
+    cb=>pairs(l,data,cb),
+    cb=>listen(l,data,cb),
+    cb=>order(l,data,cb),
+    cb=>response(l,data,cb),
+    cb=>situation(l,data,cb),
+    cb=>meaning(l,data,cb)
+  ];
+  let pos=0,finished=false;
+  function next(){
+    if(finished)return;
+    if(pos>=stages.length){finished=true;finish(done);return;}
+    const current=pos++;
+    let called=false;
+    const cb=()=>{if(called||finished)return;called=true;setTimeout(next,80)};
+    try{stages[current](cb)}catch(e){console.error('Error en juego',current+1,e);cb()}
+  }
+  next();
+};
 })();
