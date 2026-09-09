@@ -110,7 +110,7 @@ function showMap(){
     <button class="fr-back" id="frBackHome">🇬🇧 Volver a inglés</button>
   </div>`;
   update();
-  document.querySelectorAll('.fr-level[data-level]').forEach(btn=>btn.addEventListener('click',()=>window.runRequiredGames?window.runRequiredGames('fr',course,Number(btn.dataset.level),()=>startLevel(Number(btn.dataset.level))):startLevel(Number(btn.dataset.level))));
+  document.querySelectorAll('.fr-level[data-level]').forEach(btn=>btn.addEventListener('click',()=>startLevel(Number(btn.dataset.level))));
   document.getElementById('tabA1').addEventListener('click',()=>{state.course='A1';showMap();});
   document.getElementById('tabA2').addEventListener('click',()=>{if(state.a2Unlocked){state.course='A2';showMap();}});
   document.getElementById('tabB1').addEventListener('click',()=>{if(state.b1Unlocked){state.course='B1';showMap();}});
@@ -172,8 +172,13 @@ function completeLevel(ln,correct,total){
   if(state.a2Completed.length>=20)state.b1Unlocked=true;
   save();
   const last=state.course==='A1'?state.completed.length>=20:state.course==='A2'?state.a2Completed.length>=20:state.b1Completed.length>=20;
-  document.getElementById('app').innerHTML=`<div class="fr-card center"><div class="fr-big">🎉</div><h2>¡Nivel completado!</h2><p>Has acertado ${correct} de ${total}.</p><p>⭐ +50 XP</p>${last?`<div class="fr-unlock"><h3>🏆 ¡Has terminado ${state.course}!</h3><p>${state.course==='A1'?'A2 ya está disponible.':state.course==='A2'?'B1 ya está disponible.':'Has completado todo el contenido B1.'}</p></div>`:''}<button class="fr-main" id="frContinue">Continuar</button></div>`;
-  document.getElementById('frContinue').addEventListener('click',()=>showMap());
+  const showCompletion=()=>{
+    document.getElementById('app').innerHTML=`<div class="fr-card center"><div class="fr-big">🎉</div><h2>¡Nivel completado!</h2><p>Has acertado ${correct} de ${total} en vocabulario.</p><p>⭐ +50 XP</p>${last?`<div class="fr-unlock"><h3>🏆 ¡Has terminado ${state.course}!</h3><p>${state.course==='A1'?'A2 ya está disponible.':state.course==='A2'?'B1 ya está disponible.':'Has completado todo el contenido B1.'}</p></div>`:''}<button class="fr-main" id="frContinue">Continuar</button></div>`;
+    document.getElementById('frContinue').addEventListener('click',()=>showMap());
+  };
+  if(window.runRequiredGames){
+    window.runRequiredGames('fr',state.course,ln,showCompletion);
+  }else showCompletion();
 }
 
 function showA1Test(){
