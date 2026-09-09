@@ -110,7 +110,7 @@ function showMap(){
     <button class="fr-back" id="frBackHome">🇬🇧 Volver a inglés</button>
   </div>`;
   update();
-  document.querySelectorAll('.fr-level[data-level]').forEach(btn=>btn.addEventListener('click',()=>startLevel(Number(btn.dataset.level))));
+  document.querySelectorAll('.fr-level[data-level]').forEach(btn=>btn.addEventListener('click',()=>window.runRequiredGames?window.runRequiredGames('fr',course,Number(btn.dataset.level),()=>startLevel(Number(btn.dataset.level))):startLevel(Number(btn.dataset.level))));
   document.getElementById('tabA1').addEventListener('click',()=>{state.course='A1';showMap();});
   document.getElementById('tabA2').addEventListener('click',()=>{if(state.a2Unlocked){state.course='A2';showMap();}});
   document.getElementById('tabB1').addEventListener('click',()=>{if(state.b1Unlocked){state.course='B1';showMap();}});
