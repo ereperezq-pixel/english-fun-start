@@ -1,0 +1,6 @@
+.word-help{cursor:pointer;border-bottom:1px dotted currentColor;border-radius:3px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.word-help:active{opacity:.65}
+.word-help-popup{position:fixed;z-index:99999;background:var(--card,#fff);color:var(--text,#222);border:1px solid rgba(0,0,0,.12);border-radius:14px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.22);font-size:16px;line-height:1.35;text-align:center}
+.word-help-popup-word{font-weight:800;font-size:19px}
+.word-help-popup-meaning{margin-top:3px}
+.word-help-popup-speak{margin-top:9px;border:0;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;background:#eee;color:inherit}
