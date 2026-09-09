@@ -1,4 +1,4 @@
-const CACHE_NAME = "english-fun-start-v32";
+const CACHE_NAME = "english-fun-start-v33";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./conversation.js", "./rewards.js", "./iphone.css", "./iphone.js", "./word-help.js", "./word-help.css", "./language-selector.js", "./language-selector.css", "./frances.html", "./frances.js", "./frances.css", "./italiano.html", "./italiano.js", "./italiano.css"];
 
 self.addEventListener("install", event => {
@@ -23,7 +23,7 @@ self.addEventListener("fetch", event => {
   // Para la página principal usamos red primero: así las futuras actualizaciones
   // se descargan sin borrar localStorage (XP, puntuación y progreso).
   const path = new URL(request.url).pathname;
-  if (request.mode === "navigate" || path.endsWith("/index.html") || path.endsWith("/frances.html") || path.endsWith("/frances.js") || path.endsWith("/frances.css") || path.endsWith("/italiano.html") || path.endsWith("/italiano.js") || path.endsWith("/italiano.css")) {
+  if (request.mode === "navigate" || path.endsWith("/language-selector.js") || path.endsWith("/language-selector.css") || path.endsWith("/index.html") || path.endsWith("/frances.html") || path.endsWith("/frances.js") || path.endsWith("/frances.css") || path.endsWith("/italiano.html") || path.endsWith("/italiano.js") || path.endsWith("/italiano.css")) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       try {
