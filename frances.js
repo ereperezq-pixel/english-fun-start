@@ -42,65 +42,105 @@ const a2Levels=[
  [['cependant','sin embargo'],['pourtant','sin embargo / aun así'],['depuis','desde / desde hace'],['pendant','durante'],['environ','aproximadamente'],['en général','en general'],['finalement','finalmente'],['Je parle français depuis deux ans.','Hablo francés desde hace dos años.']]
 ];
 
+
+// FRANCÉS B1 — 20 niveles, más natural y orientado a comunicación real.
+const b1Topics=[
+ 'Historias y experiencias','Opiniones y argumentos','Trabajo y proyectos','Tecnología y comunicación','Viajes y problemas',
+ 'Salud y consejos','Medio ambiente','Educación y aprendizaje','Relaciones y personalidad','Tiempo libre y cultura',
+ 'Noticias y medios','Condicionales','Pasado y narración','Futuro y decisiones','Modales y obligaciones',
+ 'Expresiones frecuentes','Comparar y explicar','Solucionar problemas','Conversación real','Repaso y misión final'
+];
+const b1Levels=[
+ [['expérience','experiencia'],['souvenir','recuerdo'],['raconter','contar'],['arriver','suceder / llegar'],['réussir','conseguir / tener éxito'],['échouer','fracasar'],['pendant que','mientras'],['Quand je suis arrivé, ils avaient déjà commencé.','Cuando llegué, ya habían empezado.']],
+ [['cependant','sin embargo'],['pourtant','sin embargo / aun así'],['en revanche','en cambio'],['à mon avis','en mi opinión'],['selon moi','según yo'],['être d’accord','estar de acuerdo'],['convaincre','convencer'],['Je ne suis pas d’accord avec cette idée.','No estoy de acuerdo con esta idea.']],
+ [['réunion','reunión'],['équipe','equipo'],['objectif','objetivo'],['délai','plazo'],['tâche','tarea'],['responsable','responsable'],['améliorer','mejorar'],['Nous devons terminer le projet avant vendredi.','Tenemos que terminar el proyecto antes del viernes.']],
+ [['réseau social','red social'],['confidentialité','privacidad'],['mot de passe','contraseña'],['fichier','archivo'],['mettre à jour','actualizar'],['partager','compartir'],['connexion','conexión'],['Je préfère vérifier les informations avant de les partager.','Prefiero comprobar la información antes de compartirla.']],
+ [['annulation','cancelación'],['correspondance','conexión / enlace'],['bagage','equipaje'],['réception','recepción'],['se perdre','perderse'],['se tromper de','equivocarse de'],['rembourser','reembolsar'],['Nous avons raté notre correspondance.','Hemos perdido nuestra conexión.']],
+ [['symptôme','síntoma'],['traitement','tratamiento'],['rendez-vous','cita'],['guérir','curarse'],['éviter','evitar'],['conseiller','aconsejar'],['se sentir mieux','sentirse mejor'],['Tu ferais mieux de te reposer quelques jours.','Harías mejor en descansar unos días.']],
+ [['déchet','residuo'],['pollution','contaminación'],['recycler','reciclar'],['énergie','energía'],['économiser','ahorrar'],['réduire','reducir'],['protéger','proteger'],['Il faudrait réduire notre consommation d’énergie.','Habría que reducir nuestro consumo de energía.']],
+ [['apprentissage','aprendizaje'],['compétence','habilidad'],['formation','formación'],['matière','asignatura'],['devoir','deber / tarea'],['réviser','repasar'],['progresser','progresar'],['Je fais des progrès depuis que je pratique tous les jours.','Progreso desde que practico todos los días.']],
+ [['confiant','seguro de sí mismo'],['généreux','generoso'],['patient','paciente'],['timide','tímido'],['fiable','fiable'],['se fier à','fiarse de'],['se mettre à la place de','ponerse en el lugar de'],['Il faut essayer de comprendre le point de vue des autres.','Hay que intentar comprender el punto de vista de los demás.']],
+ [['spectacle','espectáculo'],['roman','novela'],['réalisateur','director'],['œuvre','obra'],['public','público'],['jouer un rôle','interpretar un papel'],['profiter de','disfrutar de / aprovechar'],['Le film m’a beaucoup fait réfléchir.','La película me hizo reflexionar mucho.']],
+ [['actualité','actualidad'],['reportage','reportaje'],['source','fuente'],['titre','titular'],['débat','debate'],['annoncer','anunciar'],['fiable','fiable'],['Il est important de vérifier la source d’une information.','Es importante comprobar la fuente de una información.']],
+ [['condition','condición'],['si','si'],['possibilité','posibilidad'],['probablement','probablemente'],['à ta place','en tu lugar'],['cela dépend','eso depende'],['faire face à','hacer frente a'],['Si j’avais plus de temps, je voyagerais davantage.','Si tuviera más tiempo, viajaría más.']],
+ [['alors que','mientras que'],['tout à coup','de repente'],['finalement','finalmente'],['au début','al principio'],['ensuite','después'],['pendant ce temps','mientras tanto'],['se rendre compte','darse cuenta'],['Je me suis rendu compte que j’avais oublié mes clés.','Me di cuenta de que había olvidado mis llaves.']],
+ [['décision','decisión'],['prévoir','prever / planear'],['avenir','futuro'],['objectif','objetivo'],['probable','probable'],['être sur le point de','estar a punto de'],['finir par','acabar por'],['Je vais changer de travail si je trouve une meilleure offre.','Voy a cambiar de trabajo si encuentro una oferta mejor.']],
+ [['obligation','obligación'],['interdiction','prohibición'],['autoriser','autorizar'],['devoir','deber'],['falloir','hacer falta / haber que'],['être censé','se supone que'],['avoir le droit de','tener derecho a'],['Vous êtes censé arriver avant huit heures.','Se supone que debe llegar antes de las ocho.']],
+ [['se débrouiller','apañárselas'],['avoir hâte de','tener ganas de'],['ça vaut le coup','merece la pena'],['tant pis','qué le vamos a hacer'],['à vrai dire','a decir verdad'],['quand même','de todos modos'],['en fait','en realidad'],['À vrai dire, je ne m’y attendais pas.','A decir verdad, no me lo esperaba.']],
+ [['semblable','parecido'],['différent','diferente'],['contrairement à','a diferencia de'],['plus efficace','más eficaz'],['moins pratique','menos práctico'],['environ','aproximadamente'],['autrement dit','dicho de otro modo'],['Cette solution est plus simple que la précédente.','Esta solución es más sencilla que la anterior.']],
+ [['panne','avería'],['plainte','queja'],['solution','solución'],['problème','problema'],['urgent','urgente'],['régler','resolver'],['s’occuper de','encargarse de'],['Je vais m’en occuper dès que possible.','Me ocuparé de ello lo antes posible.']],
+ [['prendre une décision','tomar una decisión'],['poser une question','hacer una pregunta'],['donner son avis','dar su opinión'],['faire attention','tener cuidado'],['tenir au courant','mantener informado'],['ça marche','de acuerdo / funciona'],['je vois ce que tu veux dire','entiendo lo que quieres decir'],['Je vois ce que tu veux dire, mais je pense autrement.','Entiendo lo que quieres decir, pero pienso de otra manera.']],
+ [['bilan','balance / repaso'],['défi','reto'],['habitude','hábito'],['progrès','progreso'],['objectif','objetivo'],['confiance','confianza'],['réussite','éxito'],['Même si je fais des erreurs, je continue à pratiquer.','Aunque cometa errores, sigo practicando.']]
+];
+
 const a1Test=[
  ['Bonjour','Hola'],['Merci','Gracias'],['maison','casa'],['école','escuela'],['eau','agua'],['ville','ciudad'],['avoir','tener'],['aller','ir'],['manger','comer'],['dormir','dormir'],['heureux','feliz'],['fatigué','cansado'],['au revoir','Adiós'],['apprendre','aprender'],['je parle français','hablo francés']
 ];
 
-let state=JSON.parse(localStorage.getItem(FRENCH_STATE_KEY)||'null')||{course:'A1',level:0,completed:[],xp:0,a2Unlocked:false,a2Level:0,a2Completed:[],a2TestPassed:false};
+let state=JSON.parse(localStorage.getItem(FRENCH_STATE_KEY)||'null')||{course:'A1',level:0,completed:[],xp:0,a2Unlocked:false,a2Level:0,a2Completed:[],a2TestPassed:false,b1Unlocked:false,b1Level:0,b1Completed:[],b1TestPassed:false};
 // Migración de partidas A1 antiguas.
 state.course=state.course||'A1'; state.level=Number.isInteger(state.level)?state.level:0; state.completed=Array.isArray(state.completed)?state.completed:[];
-state.xp=Number(state.xp||0); state.a2Unlocked=!!state.a2Unlocked; state.a2Level=Number.isInteger(state.a2Level)?state.a2Level:0; state.a2Completed=Array.isArray(state.a2Completed)?state.a2Completed:[]; state.a2TestPassed=!!state.a2TestPassed;
-if(state.completed.length>=20)state.a2Unlocked=true;
+state.xp=Number(state.xp||0); state.a2Unlocked=!!state.a2Unlocked; state.a2Level=Number.isInteger(state.a2Level)?state.a2Level:0; state.a2Completed=Array.isArray(state.a2Completed)?state.a2Completed:[]; state.a2TestPassed=!!state.a2TestPassed; state.b1Unlocked=!!state.b1Unlocked; state.b1Level=Number.isInteger(state.b1Level)?state.b1Level:0; state.b1Completed=Array.isArray(state.b1Completed)?state.b1Completed:[]; state.b1TestPassed=!!state.b1TestPassed;
+if(state.completed.length>=20)state.a2Unlocked=true; if(state.a2Completed.length>=20)state.b1Unlocked=true;
 
 function save(){localStorage.setItem(FRENCH_STATE_KEY,JSON.stringify(state));update();}
-function update(){const xp=document.getElementById('xp');const progress=document.getElementById('progress');const levelText=document.getElementById('levelText');if(xp)xp.textContent=state.xp;if(progress){const done=state.course==='A2'?state.a2Completed.length:state.completed.length;progress.style.width=((done/20)*100)+'%';}if(levelText)levelText.textContent='Nivel '+((state.course==='A2'?state.a2Level:state.level)+1)+' / 20';}
+function update(){const xp=document.getElementById('xp');const progress=document.getElementById('progress');const levelText=document.getElementById('levelText');if(xp)xp.textContent=state.xp;if(progress){const done=state.course==='A1'?state.completed.length:state.course==='A2'?state.a2Completed.length:state.b1Completed.length;progress.style.width=((done/20)*100)+'%';}if(levelText){const lv=state.course==='A1'?state.level:state.course==='A2'?state.a2Level:state.b1Level;levelText.textContent='Nivel '+(lv+1)+' / 20';}}
 function courseCompleteA1(){return state.completed.length>=20;}
 
 function showMap(){
-  if(courseCompleteA1())state.a2Unlocked=true;
-  const a1Open=state.course==='A1';
-  const topics=a1Open?a1Topics:a2Topics;
-  const completed=a1Open?state.completed:state.a2Completed;
-  const current=a1Open?state.level:state.a2Level;
-  const title=a1Open?'Francés A1':'Francés A2';
+  if(state.completed.length>=20)state.a2Unlocked=true;
+  if(state.a2Completed.length>=20)state.b1Unlocked=true;
+  const course=state.course;
+  const isA1=course==='A1', isA2=course==='A2', isB1=course==='B1';
+  const topics=isA1?a1Topics:isA2?a2Topics:b1Topics;
+  const completed=isA1?state.completed:isA2?state.a2Completed:state.b1Completed;
+  const current=isA1?state.level:isA2?state.a2Level:state.b1Level;
+  const title='Francés '+course;
+  const subtitle=isA1?'Primer módulo de francés.':isA2?'Segundo módulo: francés básico alto, con frases y situaciones más completas.':'Tercer módulo: francés intermedio, más natural y orientado a situaciones reales.';
   document.getElementById('app').innerHTML=`<div class="fr-card">
-    <div class="fr-header"><div><h1>🇫🇷 ${title}</h1><p>${a1Open?'Primer módulo de francés.':'Segundo módulo: francés básico alto, con frases y situaciones más completas.'}</p></div><div class="fr-stats"><span>⭐ <b id="xp">${state.xp}</b> XP</span></div></div>
-    <div class="fr-course-tabs"><button class="fr-tab ${a1Open?'active':''}" id="tabA1">A1</button><button class="fr-tab ${!a1Open?'active':''} ${state.a2Unlocked?'':'locked'}" id="tabA2" ${state.a2Unlocked?'':'disabled'}>A2 ${state.a2Unlocked?'':'🔒'}</button></div>
-    ${!state.a2Unlocked&&courseCompleteA1()?'':(!state.a2Unlocked?`<div class="fr-unlock"><h3>🔒 A2 bloqueado</h3><p>Completa los 20 niveles de A1 o supera la prueba final con <strong>14 de 15</strong> aciertos.</p><button class="fr-main" id="frTestA1">📝 Hacer prueba final A1</button><button class="fr-back" id="frCode">🔑 Introducir código 1111</button></div>`:'')}
-    ${state.a2Unlocked&&!a1Open?'': ''}
-    <div class="fr-progress"><div id="progress"></div></div>
-    <div class="fr-levels">${topics.map((t,i)=>`<button class="fr-level ${completed.includes(i)?'done':''} ${i<=current?'open':'locked'}" ${i<=current?'':'disabled'} data-level="${i}"><b>${i+1}</b><span>${t}</span><small>${completed.includes(i)?'✓ Completado':i===current?'▶ Empezar':'🔒 Bloqueado'}</small></button>`).join('')}</div>
-    ${a1Open&&state.a2Unlocked?'<div class="fr-unlock"><h3>🎉 ¡A2 desbloqueado!</h3><p>Ya puedes empezar el segundo curso.</p><button class="fr-main" id="goA2">🇫🇷 Entrar en A2</button></div>':''}
-    ${!a1Open?'<div class="fr-unlock"><p>Para volver al primer curso:</p><button class="fr-back" id="goA1">← Volver a A1</button></div>':''}
+    <div class="fr-header"><div><h1>🇫🇷 ${title}</h1><p>${subtitle}</p></div><div class="fr-stats"><span>⭐ <b id="xp">${state.xp}</b> XP</span></div></div>
+    <div class="fr-course-tabs"><button class="fr-tab ${isA1?'active':''}" id="tabA1">A1</button><button class="fr-tab ${isA2?'active':''} ${state.a2Unlocked?'':'locked'}" id="tabA2" ${state.a2Unlocked?'':'disabled'}>A2 ${state.a2Unlocked?'':'🔒'}</button><button class="fr-tab ${isB1?'active':''} ${state.b1Unlocked?'':'locked'}" id="tabB1" ${state.b1Unlocked?'':'disabled'}>B1 ${state.b1Unlocked?'':'🔒'}</button></div>
+    ${isA1&&!state.a2Unlocked?`<div class="fr-unlock"><h3>🔒 A2 bloqueado</h3><p>Completa los 20 niveles de A1 o supera la prueba final con <strong>14 de 15</strong> aciertos.</p><button class="fr-main" id="frTestA1">📝 Hacer prueba final A1</button><button class="fr-back" id="frCodeA2">🔑 Introducir código 1111</button></div>`:''}
+    ${isA2&&!state.b1Unlocked?`<div class="fr-unlock"><h3>🔒 B1 bloqueado</h3><p>Completa los 20 niveles de A2 o supera la prueba final A2 con <strong>14 de 15</strong> aciertos.</p><button class="fr-main" id="frTestA2">📝 Hacer prueba final A2</button><button class="fr-back" id="frCodeB1">🔑 Introducir código 1111</button></div>`:''}
+    <div class="fr-progress"><div id="progress"></div></div><div class="fr-levels">${topics.map((t,i)=>`<button class="fr-level ${completed.includes(i)?'done':''} ${i<=current?'open':'locked'}" ${i<=current?'':'disabled'} data-level="${i}"><b>${i+1}</b><span>${t}</span><small>${completed.includes(i)?'✓ Completado':i===current?'▶ Empezar':'🔒 Bloqueado'}</small></button>`).join('')}</div>
+    ${isA1&&state.a2Unlocked?'<div class="fr-unlock"><h3>🎉 ¡A2 desbloqueado!</h3><button class="fr-main" id="goA2">🇫🇷 Entrar en A2</button></div>':''}
+    ${isA2&&state.b1Unlocked?'<div class="fr-unlock"><h3>🎉 ¡B1 desbloqueado!</h3><button class="fr-main" id="goB1">🇫🇷 Entrar en B1</button></div>':''}
+    ${!isA1?'<div class="fr-unlock"><p>Curso anterior:</p><button class="fr-back" id="goA1">← Volver a A1</button></div>':''}
+    ${isB1?'<div class="fr-unlock"><p>Curso anterior:</p><button class="fr-back" id="goA2">← Volver a A2</button></div>':''}
     <button class="fr-back" id="frBackHome">🇬🇧 Volver a inglés</button>
   </div>`;
   update();
   document.querySelectorAll('.fr-level[data-level]').forEach(btn=>btn.addEventListener('click',()=>startLevel(Number(btn.dataset.level))));
   document.getElementById('tabA1').addEventListener('click',()=>{state.course='A1';showMap();});
   document.getElementById('tabA2').addEventListener('click',()=>{if(state.a2Unlocked){state.course='A2';showMap();}});
-  const goA2=document.getElementById('goA2'); if(goA2)goA2.addEventListener('click',()=>{state.course='A2';showMap();});
-  const goA1=document.getElementById('goA1'); if(goA1)goA1.addEventListener('click',()=>{state.course='A1';showMap();});
-  const test=document.getElementById('frTestA1'); if(test)test.addEventListener('click',showA1Test);
-  const code=document.getElementById('frCode'); if(code)code.addEventListener('click',()=>{const c=prompt('Introduce el código para desbloquear A2:');if(c==='1111'){state.a2Unlocked=true;state.course='A2';save();showMap();}else if(c!==null)alert('Código incorrecto.');});
+  document.getElementById('tabB1').addEventListener('click',()=>{if(state.b1Unlocked){state.course='B1';showMap();}});
+  const goA2=document.getElementById('goA2');if(goA2)goA2.addEventListener('click',()=>{state.course='A2';showMap();});
+  const goB1=document.getElementById('goB1');if(goB1)goB1.addEventListener('click',()=>{state.course='B1';showMap();});
+  const goA1=document.getElementById('goA1');if(goA1)goA1.addEventListener('click',()=>{state.course='A1';showMap();});
+  const test=document.getElementById('frTestA1');if(test)test.addEventListener('click',showA1Test);
+  const test2=document.getElementById('frTestA2');if(test2)test2.addEventListener('click',showA2Test);
+  const codeA2=document.getElementById('frCodeA2');if(codeA2)codeA2.addEventListener('click',()=>unlockWithCode('A2'));
+  const codeB1=document.getElementById('frCodeB1');if(codeB1)codeB1.addEventListener('click',()=>unlockWithCode('B1'));
   document.getElementById('frBackHome').addEventListener('click',()=>location.href='index.html');
 }
+function unlockWithCode(target){const c=prompt('Introduce el código para desbloquear '+target+':');if(c!=='1111'){if(c!==null)alert('Código incorrecto.');return;}if(target==='A2'){state.a2Unlocked=true;state.course='A2';}else{state.b1Unlocked=true;state.course='B1';}save();showMap();}
 
 function speakFrench(text){if(!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='fr-FR';u.rate=0.78;const voices=window.speechSynthesis.getVoices();const voice=voices.find(v=>/^fr-FR$/i.test(v.lang))||voices.find(v=>/^fr[-_]/i.test(v.lang));if(voice)u.voice=voice;window.speechSynthesis.speak(u);}
 
-function getCourseData(){return state.course==='A2'?a2Levels:words;}
-function getCourseTopics(){return state.course==='A2'?a2Topics:a1Topics;}
-function getCourseCompleted(){return state.course==='A2'?state.a2Completed:state.completed;}
+function getCourseData(){return state.course==='A1'?words:state.course==='A2'?a2Levels:b1Levels;}
+function getCourseTopics(){return state.course==='A1'?a1Topics:state.course==='A2'?a2Topics:b1Topics;}
+function getCourseCompleted(){return state.course==='A1'?state.completed:state.course==='A2'?state.a2Completed:state.b1Completed;}
 
 function startLevel(n){
   const course=state.course; const topics=getCourseTopics(); const data=getCourseData();
-  if(course==='A1')state.level=n;else state.a2Level=n;
+  if(course==='A1')state.level=n;else if(course==='A2')state.a2Level=n;else state.b1Level=n;
   let q;
-  if(course==='A2')q=shuffle(data[n]||data[0]).slice(0,4);
-  else {const startIndex=(n*2)%Math.max(1,words.length-12);q=shuffle(words.slice(startIndex,startIndex+12)).slice(0,4);}
+  if(course==='A1'){const startIndex=(n*2)%Math.max(1,words.length-12);q=shuffle(words.slice(startIndex,startIndex+12)).slice(0,4);}
+  else q=shuffle(data[n]||data[0]).slice(0,4);
   let i=0,correct=0,answerLocked=false,advanceTimer=null;
   function render(){
     answerLocked=false; const [fr,es]=q[i];
-    const all=course==='A2'?data.flat():words;
+    const all=course==='A1'?words:data.flat();
     const opts=shuffle([es,...shuffle(all).filter(x=>x[1]!==es).slice(0,3).map(x=>x[1])]);
     document.getElementById('app').innerHTML=`<div class="fr-card"><div class="fr-top"><button class="fr-back" id="frBack">← Niveles</button><span>🇫🇷 ${course} · ${topics[n]}</span></div><div class="fr-question-tag">${course==='A2'?'Nivel A2 · Comprensión':'Nivel A1 · Vocabulario'}</div><h2>${fr}</h2><button type="button" class="fr-listen" id="frListen">🔊 Escuchar en francés</button><p>¿Qué significa?</p><div class="fr-answers" id="frAnswers">${opts.map((o,k)=>`<button type="button" data-answer-index="${k}">${o}</button>`).join('')}</div><div id="frFeedback"></div><small>Pregunta ${i+1} de ${q.length}</small></div>`;
     document.getElementById('frBack').addEventListener('click',()=>{if(advanceTimer)clearTimeout(advanceTimer);if(window.speechSynthesis)window.speechSynthesis.cancel();showMap();});
@@ -122,18 +162,29 @@ function startLevel(n){
 }
 
 function completeLevel(ln,correct,total){
-  if(state.course==='A2'){if(!state.a2Completed.includes(ln))state.a2Completed.push(ln);if(ln<19)state.a2Level=Math.max(state.a2Level,ln+1);}
-  else {if(!state.completed.includes(ln))state.completed.push(ln);if(ln<19)state.level=Math.max(state.level,ln+1);}
-  state.xp+=50;save();
-  const last=state.course==='A2'?state.a2Completed.length>=20:state.completed.length>=20;
-  document.getElementById('app').innerHTML=`<div class="fr-card center"><div class="fr-big">🎉</div><h2>¡Nivel completado!</h2><p>Has acertado ${correct} de ${total}.</p><p>⭐ +50 XP</p>${last?`<div class="fr-unlock"><h3>🏆 ¡Has terminado ${state.course}!</h3><p>${state.course==='A1'?'A2 ya está disponible.':'Has completado todo el contenido A2.'}</p></div>`:''}<button class="fr-main" id="frContinue">Continuar</button></div>`;
-  document.getElementById('frContinue').addEventListener('click',()=>{if(state.course==='A1'&&state.completed.length>=20){state.a2Unlocked=true;}showMap();});
+  if(state.course==='A1'){if(!state.completed.includes(ln))state.completed.push(ln);if(ln<19)state.level=Math.max(state.level,ln+1);}
+  else if(state.course==='A2'){if(!state.a2Completed.includes(ln))state.a2Completed.push(ln);if(ln<19)state.a2Level=Math.max(state.a2Level,ln+1);}
+  else {if(!state.b1Completed.includes(ln))state.b1Completed.push(ln);if(ln<19)state.b1Level=Math.max(state.b1Level,ln+1);}
+  state.xp+=50;
+  if(state.completed.length>=20)state.a2Unlocked=true;
+  if(state.a2Completed.length>=20)state.b1Unlocked=true;
+  save();
+  const last=state.course==='A1'?state.completed.length>=20:state.course==='A2'?state.a2Completed.length>=20:state.b1Completed.length>=20;
+  document.getElementById('app').innerHTML=`<div class="fr-card center"><div class="fr-big">🎉</div><h2>¡Nivel completado!</h2><p>Has acertado ${correct} de ${total}.</p><p>⭐ +50 XP</p>${last?`<div class="fr-unlock"><h3>🏆 ¡Has terminado ${state.course}!</h3><p>${state.course==='A1'?'A2 ya está disponible.':state.course==='A2'?'B1 ya está disponible.':'Has completado todo el contenido B1.'}</p></div>`:''}<button class="fr-main" id="frContinue">Continuar</button></div>`;
+  document.getElementById('frContinue').addEventListener('click',()=>showMap());
 }
 
 function showA1Test(){
   let i=0,score=0,locked=false;const q=shuffle(a1Test);
   function render(){locked=false;const [fr,es]=q[i];const opts=shuffle([es,...shuffle(a1Test).filter(x=>x[1]!==es).slice(0,3).map(x=>x[1])]);document.getElementById('app').innerHTML=`<div class="fr-card"><div class="fr-top"><button class="fr-back" id="testBack">← Volver</button><span>🇫🇷 Prueba final A1</span></div><h2>${fr}</h2><button class="fr-listen" id="testListen">🔊 Escuchar</button><p>¿Qué significa?</p><div class="fr-answers" id="testAnswers">${opts.map((o,k)=>`<button type="button" data-k="${k}">${o}</button>`).join('')}</div><div id="testFeedback"></div><small>Pregunta ${i+1} de 15 · Necesitas 14/15</small></div>`;document.getElementById('testBack').addEventListener('click',showMap);document.getElementById('testListen').addEventListener('click',()=>speakFrench(fr));setTimeout(()=>speakFrench(fr),180);document.querySelectorAll('#testAnswers button').forEach(b=>b.addEventListener('click',()=>{if(locked)return;locked=true;document.querySelectorAll('#testAnswers button').forEach(x=>x.disabled=true);if(b.textContent===es)score++;const fb=document.getElementById('testFeedback');fb.innerHTML=b.textContent===es?'<div class="ok">✅ Correcto</div>':'<div class="bad">❌ Correcto: <strong>'+es+'</strong></div>';setTimeout(()=>{i++;if(i<15)render();else finish();},1200);}));}
   function finish(){const passed=score>=14;if(passed){state.a2Unlocked=true;state.a2TestPassed=true;state.course='A2';state.xp+=100;save();document.getElementById('app').innerHTML=`<div class="fr-card center"><div class="fr-big">🏆</div><h2>¡Prueba superada!</h2><p>${score}/15 correctas.</p><p>🇫🇷 A2 está desbloqueado.</p><button class="fr-main" id="goA2Test">Entrar en A2</button></div>`;document.getElementById('goA2Test').addEventListener('click',showMap);}else{document.getElementById('app').innerHTML=`<div class="fr-card center"><div class="fr-big">📚</div><h2>Aún no has llegado a 90 %</h2><p>Resultado: ${score}/15. Necesitas 14/15.</p><button class="fr-main" id="retryTest">Repetir prueba</button><button class="fr-back" id="backTest">Volver al mapa</button></div>`;document.getElementById('retryTest').addEventListener('click',showA1Test);document.getElementById('backTest').addEventListener('click',showMap);}}
+  render();
+}
+
+function showA2Test(){
+  const pool=shuffle(a2Levels.flat().filter(x=>x[0])); let i=0,score=0,locked=false; const q=pool.slice(0,15);
+  function render(){locked=false;const [fr,es]=q[i];const opts=shuffle([es,...shuffle(pool).filter(x=>x[1]!==es).slice(0,3).map(x=>x[1])]);document.getElementById('app').innerHTML=`<div class="fr-card"><div class="fr-top"><button class="fr-back" id="testBack">← Volver</button><span>🇫🇷 Prueba final A2</span></div><h2>${fr}</h2><button class="fr-listen" id="testListen">🔊 Escuchar</button><p>¿Qué significa?</p><div class="fr-answers" id="testAnswers">${opts.map((o,k)=>`<button type="button" data-k="${k}">${o}</button>`).join('')}</div><div id="testFeedback"></div><small>Pregunta ${i+1} de 15 · Necesitas 14/15</small></div>`;document.getElementById('testBack').addEventListener('click',showMap);document.getElementById('testListen').addEventListener('click',()=>speakFrench(fr));setTimeout(()=>speakFrench(fr),180);document.querySelectorAll('#testAnswers button').forEach(b=>b.addEventListener('click',()=>{if(locked)return;locked=true;document.querySelectorAll('#testAnswers button').forEach(x=>x.disabled=true);if(b.textContent===es)score++;const fb=document.getElementById('testFeedback');fb.innerHTML=b.textContent===es?'<div class="ok">✅ Correcto</div>':'<div class="bad">❌ Correcto: <strong>'+es+'</strong></div>';setTimeout(()=>{i++;if(i<15)render();else finish();},1200);}));}
+  function finish(){const passed=score>=14;if(passed){state.b1Unlocked=true;state.b1TestPassed=true;state.course='B1';state.xp+=100;save();document.getElementById('app').innerHTML=`<div class="fr-card center"><div class="fr-big">🏆</div><h2>¡Prueba A2 superada!</h2><p>${score}/15 correctas.</p><p>🇫🇷 B1 está desbloqueado.</p><button class="fr-main" id="goB1Test">Entrar en B1</button></div>`;document.getElementById('goB1Test').addEventListener('click',showMap);}else{document.getElementById('app').innerHTML=`<div class="fr-card center"><div class="fr-big">📚</div><h2>Aún no has llegado a 90 %</h2><p>Resultado: ${score}/15. Necesitas 14/15.</p><button class="fr-main" id="retryTest">Repetir prueba</button><button class="fr-back" id="backTest">Volver al mapa</button></div>`;document.getElementById('retryTest').addEventListener('click',showA2Test);document.getElementById('backTest').addEventListener('click',showMap);}}
   render();
 }
 
