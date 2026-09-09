@@ -14,20 +14,38 @@ let state=JSON.parse(localStorage.getItem(FRENCH_STATE_KEY)||'null')||{level:0,c
 function save(){localStorage.setItem(FRENCH_STATE_KEY,JSON.stringify(state));update();}
 function update(){const xp=document.getElementById('xp');const progress=document.getElementById('progress');const levelText=document.getElementById('levelText');if(xp)xp.textContent=state.xp;if(progress)progress.style.width=((state.completed.length/20)*100)+'%';if(levelText)levelText.textContent='Nivel '+(state.level+1)+' / 20';}
 function showMap(){document.getElementById('app').innerHTML=`<div class="fr-card"><h1>🇫🇷 Francés A1</h1><p>Primer módulo independiente de francés.</p><div class="fr-progress"><div id="progress"></div></div><div class="fr-levels">${levelTopics.map((t,i)=>`<button class="fr-level ${state.completed.includes(i)?'done':''} ${i<=state.level?'open':'locked'}" ${i<=state.level?'':'disabled'} onclick="startLevel(${i})"><b>${i+1}</b><span>${t}</span><small>${state.completed.includes(i)?'✓ Completado':i===state.level?'▶ Empezar':'🔒 Bloqueado'}</small></button>`).join('')}</div><button class="fr-back" onclick="location.href='index.html'">🇬🇧 Volver a inglés</button></div>`;update();}
+function speakFrench(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='fr-FR';
+  u.rate=0.78;
+  const voices=window.speechSynthesis.getVoices();
+  const voice=voices.find(v=>/^fr-FR$/i.test(v.lang))||voices.find(v=>/^fr[-_]/i.test(v.lang));
+  if(voice) u.voice=voice;
+  window.speechSynthesis.speak(u);
+}
+function speakFrenchExample(text){
+  const clean=text.split(' — ')[0].replace(/^🗣️\s*En una frase:\s*/,'').trim();
+  speakFrench(clean);
+}
+
 function startLevel(n){
   state.level=n;
   const startIndex=(n*2)%Math.max(1,words.length-12);
   const pool=shuffle(words.slice(startIndex,startIndex+12));
   const q=pool.slice(0,4);
-  let i=0,correct=0,answerLocked=false;
+  let i=0,correct=0,answerLocked=false,advanceTimer=null;
 
   function render(){
     answerLocked=false;
     const [fr,es]=q[i];
     const opts=shuffle([es,...shuffle(words).filter(x=>x[1]!==es).slice(0,3).map(x=>x[1])]);
-    document.getElementById('app').innerHTML=`<div class="fr-card"><div class="fr-top"><button class="fr-back" id="frBack">← Niveles</button><span>🇫🇷 A1 · ${levelTopics[n]}</span></div><h2>${fr}</h2><p>¿Qué significa?</p><div class="fr-answers" id="frAnswers">${opts.map((o,k)=>`<button type="button" data-answer-index="${k}">${o}</button>`).join('')}</div><div id="frFeedback"></div><small>Pregunta ${i+1} de ${q.length}</small></div>`;
+    document.getElementById('app').innerHTML=`<div class="fr-card"><div class="fr-top"><button class="fr-back" id="frBack">← Niveles</button><span>🇫🇷 A1 · ${levelTopics[n]}</span></div><h2>${fr}</h2><button type="button" class="fr-listen" id="frListen">🔊 Escuchar en francés</button><p>¿Qué significa?</p><div class="fr-answers" id="frAnswers">${opts.map((o,k)=>`<button type="button" data-answer-index="${k}">${o}</button>`).join('')}</div><div id="frFeedback"></div><small>Pregunta ${i+1} de ${q.length}</small></div>`;
 
-    document.getElementById('frBack').addEventListener('click',showMap);
+    document.getElementById('frBack').addEventListener('click',()=>{if(advanceTimer)clearTimeout(advanceTimer);if(window.speechSynthesis)window.speechSynthesis.cancel();showMap();});
+    document.getElementById('frListen').addEventListener('click',()=>speakFrench(fr));
+    setTimeout(()=>speakFrench(fr),180);
     document.querySelectorAll('#frAnswers button').forEach(btn=>{
       btn.addEventListener('click',()=>{
         if(answerLocked)return;
@@ -42,15 +60,21 @@ function startLevel(n){
     const fb=document.getElementById('frFeedback');
     if(!fb)return;
     const example=getFrenchExample(c);
+    const audioText=getFrenchExampleSentence(c);
+    const audioButton='<button type="button" class="fr-listen" id="frExampleListen">🔊 Escuchar la frase</button>';
     if(a===c){
       correct++;
       state.xp+=10;
-      fb.innerHTML='<div class="ok">✅ ¡Muy bien!</div>'+example;
+      fb.innerHTML='<div class="ok">✅ ¡Muy bien!</div>'+example+audioButton+'<div class="fr-next">⏱️ Siguiente pregunta en 4 segundos…</div>';
     }else{
-      fb.innerHTML='<div class="bad">❌ Correcto: <strong>'+c+'</strong></div>'+example;
+      fb.innerHTML='<div class="bad">❌ Correcto: <strong>'+c+'</strong></div>'+example+audioButton+'<div class="fr-next">⏱️ Siguiente pregunta en 4 segundos…</div>';
     }
+    const exampleBtn=document.getElementById('frExampleListen');
+    if(exampleBtn) exampleBtn.addEventListener('click',()=>speakFrench(audioText));
+    speakFrench(audioText);
     save();
-    setTimeout(()=>{
+    advanceTimer=setTimeout(()=>{
+      advanceTimer=null;
       i++;
       if(i<q.length){
         render();
@@ -66,6 +90,13 @@ function startLevel(n){
   }
 
   render();
+}
+
+function getFrenchExampleSentence(fr){
+  const examples={
+    'Bonjour':'Bonjour, comment ça va ?','Salut':'Salut, à demain !','Merci':'Merci beaucoup pour ton aide.','S’il vous plaît':'Un café, s’il vous plaît.','Au revoir':'Au revoir, à demain !','oui':'Oui, je comprends.','non':'Non, je ne sais pas.','ami':'C’est mon ami.','famille':'Ma famille habite ici.','maison':'Ma maison est petite.','école':'Je vais à l’école.','travail':'Je suis au travail.','eau':'Je bois de l’eau.','pain':'Je mange du pain.','café':'J’aime le café.','ville':'J’habite dans une grande ville.','rue':'La rue est calme.','voiture':'Ma voiture est devant la maison.','livre':'Je lis un livre.','jour':'Bonne journée !','nuit':'Bonne nuit !','matin':'Je travaille le matin.','soir':'Je regarde la télé le soir.','aujourd’hui':'Aujourd’hui, je travaille.','demain':'Demain, je vais à l’école.','hier':'Hier, j’étais à la maison.','être':'Je suis fatigué.','avoir':'J’ai un livre.','aller':'Je vais au travail.','faire':'Je fais mes devoirs.','aimer':'J’aime le français.','parler':'Je parle français.','écouter':'J’écoute de la musique.','manger':'J’aime manger du pain.','boire':'Je veux boire de l’eau.','dormir':'Je vais dormir.','lire':'J’aime lire.','écrire':'J’aime écrire.','comprendre':'Je comprends la question.','apprendre':'J’apprends le français.','grand':'Mon appartement est grand.','petit':'Le café est petit.','bon':'C’est très bon !','mauvais':'Ce n’est pas mauvais.','facile':'C’est facile.','difficile':'C’est difficile.','heureux':'Je suis heureux aujourd’hui.','fatigué':'Je suis très fatigué.','aujourd’hui je travaille':'Aujourd’hui, je travaille à la maison.','j’aime le café':'J’aime le café le matin.','je vais à l’école':'Je vais à l’école à huit heures.','je parle français':'Je parle français avec mon ami.'
+  };
+  return examples[fr]||fr;
 }
 
 function getFrenchExample(fr){

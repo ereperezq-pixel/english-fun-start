@@ -1,3 +1,4 @@
+English Fun Start · Actualización 28 · v2.8.0
 English Fun Start · A1 + A2 + B1
 
 3 cursos de 20 niveles: A1, A2 y B1.
