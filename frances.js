@@ -126,6 +126,7 @@ function showMap(){
 function unlockWithCode(target){const c=prompt('Introduce el código para desbloquear '+target+':');if(c!=='1111'){if(c!==null)alert('Código incorrecto.');return;}if(target==='A2'){state.a2Unlocked=true;state.course='A2';}else{state.b1Unlocked=true;state.course='B1';}save();showMap();}
 
 function speakFrench(text){if(!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='fr-FR';u.rate=0.78;const voices=window.speechSynthesis.getVoices();const voice=voices.find(v=>/^fr-FR$/i.test(v.lang))||voices.find(v=>/^fr[-_]/i.test(v.lang));if(voice)u.voice=voice;window.speechSynthesis.speak(u);}
+function speakSpanish(text){if(!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text));u.lang='es-ES';u.rate=0.90;const voices=window.speechSynthesis.getVoices();const voice=voices.find(v=>/^es-ES$/i.test(v.lang))||voices.find(v=>/^es[-_]/i.test(v.lang));if(voice)u.voice=voice;window.speechSynthesis.speak(u);}
 
 function getCourseData(){return state.course==='A1'?words:state.course==='A2'?a2Levels:b1Levels;}
 function getCourseTopics(){return state.course==='A1'?a1Topics:state.course==='A2'?a2Topics:b1Topics;}
@@ -152,9 +153,10 @@ function startLevel(n){
     const fb=document.getElementById('frFeedback');if(!fb)return;
     const example=getFrenchExample(c);const audioText=getFrenchExampleSentence(c);
     const ok=a===c;
-    if(ok){correct++;state.xp+=10;fb.innerHTML='<div class="ok">✅ ¡Muy bien!</div>'+example+'<button type="button" class="fr-listen" id="frExampleListen">🔊 Escuchar la frase</button><div class="fr-next">⏱️ Siguiente pregunta en 4 segundos…</div>'}
-    else fb.innerHTML='<div class="bad">❌ Correcto: <strong>'+c+'</strong></div>'+example+'<button type="button" class="fr-listen" id="frExampleListen">🔊 Escuchar la frase</button><div class="fr-next">⏱️ Siguiente pregunta en 4 segundos…</div>';
+    if(ok){correct++;state.xp+=10;fb.innerHTML='<div class="ok">✅ ¡Muy bien!</div>'+example+'<button type="button" class="fr-listen" id="frExampleListen">🔊 Escuchar la frase en francés</button><button type="button" class="fr-listen" id="frSpanishListen">🇪🇸 Escuchar en español</button><div class="fr-next">⏱️ Siguiente pregunta en 4 segundos…</div>'}
+    else fb.innerHTML='<div class="bad">❌ Correcto: <strong>'+c+'</strong></div>'+example+'<button type="button" class="fr-listen" id="frExampleListen">🔊 Escuchar la frase en francés</button><button type="button" class="fr-listen" id="frSpanishListen">🇪🇸 Escuchar en español</button><div class="fr-next">⏱️ Siguiente pregunta en 4 segundos…</div>';
     const eb=document.getElementById('frExampleListen');if(eb)eb.addEventListener('click',()=>speakFrench(audioText));
+    const esb=document.getElementById('frSpanishListen');if(esb)esb.addEventListener('click',()=>speakSpanish(c));
     speakFrench(audioText);save();
     advanceTimer=setTimeout(()=>{advanceTimer=null;i++;if(i<q.length){render();}else completeLevel(ln,correct,q.length);},4000);
   }
