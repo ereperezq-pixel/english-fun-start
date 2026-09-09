@@ -69,6 +69,23 @@
   }
   window.processStreakReward=processStreakReward;
 
+  function processXPReward(){
+    ensureRewards();
+    const milestones=[
+      {n:30,id:"xp30",type:"basic",icon:"🎁",label:"Cofre básico"},
+      {n:100,id:"xp100",type:"silver",icon:"🥈",label:"Cofre de plata"},
+      {n:250,id:"xp250",type:"special",icon:"💎",label:"Cofre especial"}
+    ];
+    const hit=milestones.find(m=>Number(state.xp||0)>=m.n&&!state.rewardMedals.includes(m.id));
+    if(!hit)return false;
+    state.rewardMedals.push(hit.id);
+    addChest(`Has alcanzado ${hit.n} XP`,hit.type);
+    showRewardToast(`⭐ ¡HAS LLEGADO A ${hit.n} XP!`,`Has conseguido un <strong>${hit.label}</strong>. El cofre está guardado en tus recompensas.`,hit.icon);
+    updateRewardHome();
+    return true;
+  }
+  window.processXPReward=processXPReward;
+
   function processRewardEvent(type, data){
     ensureRewards();
     let messages=[];

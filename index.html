@@ -44,6 +44,9 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 .speech-button.secondary{background:#fff;color:#2575fc;border:2px solid #2575fc}
 .speech-status{font-size:13px;color:#5d7182;margin-top:6px}
 
+
+.app-version{margin:28px 0 8px;text-align:center;font-size:12px;opacity:.58;letter-spacing:.2px}.app-version strong{font-weight:700}
+@media (max-width:650px){.app-version{margin-top:22px;margin-bottom:calc(8px + env(safe-area-inset-bottom));font-size:11px}}
 </style>
 </head>
 <body>
@@ -61,6 +64,7 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 <div class="card center"><h1>🇬🇧 Aprende inglés jugando</h1><p>Aprende palabras y frases poco a poco, repitiendo lo necesario hasta que se te queden.</p><p>Cada nivel añade algo nuevo y repasa lo anterior.</p>
 <button class="main-button" onclick="showLevels()">🗺️ Ver niveles</button>
 <button class="secondary-button" onclick="startCurrentLevel()">▶️ Continuar aprendiendo</button></div>
+<div class="app-version">English Fun Start · <strong>Actualización 24</strong> · v2.4.0</div>
 </section>
 
 <section id="levelsScreen" class="hidden"><div class="card"><h2>🎓 Cursos</h2><div id="courseGrid" class="level-grid"></div></div><div class="card"><h2 id="courseTitle">🗺️ A1 · Niveles</h2><p id="courseDescription">Avanza paso a paso.</p><div class="level-grid" id="levelGrid"></div><div class="unlock-panel center" id="courseUnlockPanel"></div></div><div class="center"><button class="secondary-button" onclick="showHome()">🏠 Inicio</button></div></section>
@@ -506,7 +510,7 @@ function repairCourseUnlocks(){
   state.unlockedLevels=lists.A1; state.unlockedLevelsA2=lists.A2; state.unlockedLevelsB1=lists.B1;
 }
 repairCourseUnlocks();
-const APP_VERSION="1.12.0";
+const APP_VERSION="2.4.0";
 function showUpdateNotice(){
   if(localStorage.getItem("englishFunLastSeenVersion")===APP_VERSION) return;
   const el=document.createElement("div");
