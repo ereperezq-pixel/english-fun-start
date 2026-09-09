@@ -15,4 +15,4 @@ Actualización 20 — arquitectura separada iPhone/iOS:
 - iphone.js contiene únicamente compatibilidad iOS y no sustituye funciones del juego.
 - Se conserva localStorage y el progreso existente.
 
-Actualización 26: selector de idiomas independiente. Inglés mantiene su núcleo; se añade módulo francés A1 separado (frances.html/js/css). Italiano queda preparado como próximamente.
+Actualización 27: selector de idiomas independiente. Inglés mantiene su núcleo; se añade módulo francés A1 separado (frances.html/js/css). Italiano queda preparado como próximamente.
