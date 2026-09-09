@@ -170,7 +170,7 @@ function answerConversation(i){
   const q=getListeningConversation(currentLevel);
   document.querySelectorAll("#gameContent .answer").forEach(b=>b.disabled=true);
   const ok=i===q[4];
-  if(ok){state.xp+=25;state.score+=25;state.streak++;}else state.streak=0;
+  if(ok){state.xp+=25;state.score+=25;state.streak++;if(typeof processStreakReward==="function")processStreakReward();}else state.streak=0;
   saveState();
   conversationFeedback.innerHTML=`<div class="feedback ${ok?'correct':'wrong'}"><strong>${ok?'🎉 ¡Muy bien! Has entendido la conversación.':'❌ Vamos a repasarla'}</strong><div class="explanation"><strong>🇪🇸 Pregunta:</strong> ${q[2]}<br><br><strong>✅ Respuesta:</strong> ${q[3][q[4]]}</div></div><button class="main-button" onclick="acceptConversation()">➡️ ACEPTAR Y CONTINUAR</button>`;
   if(ok)playConversation();

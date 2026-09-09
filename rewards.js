@@ -29,11 +29,45 @@
 
   function totalCompleted(){ return Array.isArray(state.completedLevels)?state.completedLevels.length:0; }
   function hasChest(id){ return state.rewardChests.some(c=>c.id===id); }
-  function addChest(reason){
+  function addChest(reason,type="basic"){
     const id="chest-"+Date.now()+"-"+Math.random().toString(36).slice(2,7);
-    state.rewardChests.push({id,reason,course:activeCourse,created:Date.now()});
+    state.rewardChests.push({id,reason,type,course:activeCourse,created:Date.now()});
     return id;
   }
+
+  function chestLabel(type){
+    return type==="special"?"💎 Cofre especial":type==="silver"?"🥈 Cofre de plata":"🎁 Cofre básico";
+  }
+
+  function showRewardToast(title,text,icon="🎁"){
+    let toast=document.getElementById("rewardToast");
+    if(!toast){
+      toast=document.createElement("div"); toast.id="rewardToast";
+      toast.style.cssText="position:fixed;left:50%;top:18px;transform:translate(-50%,-140%);z-index:20000;background:linear-gradient(135deg,#fff,#f4f7ff);color:#172033;border-radius:22px;padding:16px 20px;min-width:min(90vw,390px);max-width:92vw;text-align:center;box-shadow:0 16px 50px rgba(0,0,0,.3);border:3px solid #ffd54a;transition:transform .35s ease,opacity .35s ease;opacity:0;font-weight:700";
+      document.body.appendChild(toast);
+    }
+    toast.innerHTML=`<div style="font-size:42px;line-height:1">${icon}</div><div style="font-size:1.15em;margin-top:5px">${title}</div><div style="font-weight:500;margin-top:5px">${text}</div>`;
+    requestAnimationFrame(()=>{toast.style.transform="translate(-50%,0)";toast.style.opacity="1"});
+    clearTimeout(window.__rewardToastTimer);
+    window.__rewardToastTimer=setTimeout(()=>{toast.style.transform="translate(-50%,-140%)";toast.style.opacity="0"},4200);
+  }
+
+  function processStreakReward(){
+    ensureRewards();
+    const milestones=[
+      {n:5,id:"streak5",type:"basic",icon:"🎁",label:"Cofre básico"},
+      {n:10,id:"streak10",type:"silver",icon:"🥈",label:"Cofre de plata"},
+      {n:20,id:"streak20",type:"special",icon:"💎",label:"Cofre especial"}
+    ];
+    const hit=milestones.find(m=>state.streak>=m.n&&!state.rewardMedals.includes(m.id));
+    if(!hit)return false;
+    state.rewardMedals.push(hit.id);
+    addChest(`Racha de ${hit.n} aciertos`,hit.type);
+    showRewardToast(`🔥 ¡RACHA DE ${hit.n}!`,`Has conseguido un <strong>${hit.label}</strong>. El cofre está guardado en tus recompensas.`,hit.icon);
+    saveState(); updateRewardHome();
+    return true;
+  }
+  window.processStreakReward=processStreakReward;
 
   function processRewardEvent(type, data){
     ensureRewards();
@@ -44,12 +78,6 @@
       if(n>0 && n%3===0){
         addChest("Has completado "+n+" niveles");
         messages.push("🎁 ¡COFRE CONSEGUIDO! Cada 3 niveles ganas un cofre.");
-      }
-      // Recompensa por racha real de aciertos.
-      if(state.streak>=5 && !state.rewardMedals.includes("streak5")){
-        state.rewardMedals.push("streak5");
-        addChest("Racha de 5 aciertos");
-        messages.push("🔥 ¡Racha de 5! Has ganado otro cofre.");
       }
       // Pequeña probabilidad de experiencia inesperada.
       if(Math.random()<0.18){
@@ -111,7 +139,8 @@
     }
     if(!unopened.length&&!bonus) content.innerHTML+=`<div class="feedback correct center">✨ No tienes premios pendientes ahora mismo.<br><br>¡Sigue aprendiendo! Los próximos pueden aparecer al completar niveles.</div>`;
     const medals=state.rewardMedals||[];
-    content.innerHTML+=`<div class="small center" style="margin-top:15px">🏅 Logros: ${medals.includes("streak5")?"🔥 Racha de 5": "Sigue jugando para conseguir tu primer logro"}</div>`;
+    const earned=[medals.includes("streak5")?"🔥 5":"",medals.includes("streak10")?"🥈 10":"",medals.includes("streak20")?"💎 20":""].filter(Boolean);
+    content.innerHTML+=`<div class="small center" style="margin-top:15px">🏅 Hitos de racha: ${earned.length?earned.join(" · "):"Todavía ninguno"}</div>`;
   }
 
   function openChest(id){
@@ -137,7 +166,7 @@
     }
     saveState();updateRewardHome();
     const content=document.getElementById("rewardContent");
-    if(content){content.innerHTML=`<div class="center"><div style="font-size:80px">${reward.icon}</div><h2>${reward.title}</h2><p>${reward.text}</p><p class="small">🎁 Cofre obtenido: ${chest.reason}.</p><button class="main-button" onclick="renderRewardRoom()">🎁 Volver a mis recompensas</button></div>`;}
+    if(content){content.innerHTML=`<div class="center"><div style="font-size:80px">${reward.icon}</div><h2>${reward.title}</h2><p>${reward.text}</p><p class="small">${chestLabel(chest.type)} · ${chest.reason}.</p><button class="main-button" onclick="renderRewardRoom()">🎁 Volver a mis recompensas</button></div>`;}
   }
   window.openChest=openChest;
   window.renderRewardRoom=renderRewardRoom;
