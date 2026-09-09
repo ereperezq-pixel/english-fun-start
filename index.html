@@ -66,7 +66,7 @@ button{font-family:inherit;cursor:pointer}.header{background:#fff;padding:15px;b
 <div class="card center"><h1>🇬🇧 Aprende inglés jugando</h1><p>Aprende palabras y frases poco a poco, repitiendo lo necesario hasta que se te queden.</p><p>Cada nivel añade algo nuevo y repasa lo anterior.</p>
 <button class="main-button" onclick="showLevels()">🗺️ Ver niveles</button>
 <button class="secondary-button" onclick="startCurrentLevel()">▶️ Continuar aprendiendo</button></div>
-<div class="app-version">English Fun Start · <strong>Actualización 27</strong> · v2.8.0</div>
+<div class="app-version">English Fun Start · <strong>Actualización 29</strong> · v2.9.0</div>
 </section>
 
 <section id="levelsScreen" class="hidden"><div class="card"><h2>🎓 Cursos</h2><div id="courseGrid" class="level-grid"></div></div><div class="card"><h2 id="courseTitle">🗺️ A1 · Niveles</h2><p id="courseDescription">Avanza paso a paso.</p><div class="level-grid" id="levelGrid"></div><div class="unlock-panel center" id="courseUnlockPanel"></div></div><div class="center"><button class="secondary-button" onclick="showHome()">🏠 Inicio</button></div></section>
@@ -512,13 +512,13 @@ function repairCourseUnlocks(){
   state.unlockedLevels=lists.A1; state.unlockedLevelsA2=lists.A2; state.unlockedLevelsB1=lists.B1;
 }
 repairCourseUnlocks();
-const APP_VERSION="2.7.1";
+const APP_VERSION="2.9.0";
 function showUpdateNotice(){
   if(localStorage.getItem("englishFunLastSeenVersion")===APP_VERSION) return;
   const el=document.createElement("div");
   el.id="updateNotice";
   el.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999";
-  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start · v2.8.0</strong></p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 Novedades de la actualización 27:</strong><br>🌍 Selector de idiomas al entrar en la app<br>🇫🇷 Francés A1 independiente con 20 niveles<br>🧠 Ejercicios más difíciles en B1 y cursos avanzados<br>🎧 Nuevas actividades de comprensión y escucha<br>🎁 Cofres, rachas, retos extra y sorpresas<br>💡 Ayuda de palabras en inglés con significado y audio<br>📱 Mejoras para móvil y iPhone<br>🔧 Corrección del aviso de actualización y de la versión visible</div><p class="small">Tu progreso, niveles desbloqueados y recompensas se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
+  el.innerHTML=`<div style="background:#fff;border-radius:22px;padding:24px;max-width:430px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:center"><div style="font-size:2.5rem">🎉</div><h2>¡La app se ha actualizado!</h2><p><strong>English Fun Start · v2.9.0</strong></p><div style="text-align:left;background:#f6f7fb;border-radius:14px;padding:14px;margin:14px 0"><strong>🆕 Novedades de la actualización 29:</strong><br>🌍 Selector de idiomas al entrar en la app<br>🇫🇷 Francés A2 completo con 20 niveles<br>📝 Prueba final A1 con 90 % para desbloquear A2<br>🔑 Código 1111 para acceso directo a A2<br>🗣️ Vocabulario, frases y situaciones de nivel A2<br>🔊 Audio en francés y 4 segundos para leer cada ejemplo<br>🔧 Mejoras de estabilidad del módulo francés y de la PWA</div><p class="small">Tu progreso, niveles desbloqueados y recompensas se mantienen.</p><button class="main-button" onclick="closeUpdateNotice()">✅ ¡ENTENDIDO!</button></div>`;
   document.body.appendChild(el);
 }
 function closeUpdateNotice(){localStorage.setItem("englishFunLastSeenVersion",APP_VERSION);document.getElementById("updateNotice")?.remove()}
@@ -859,7 +859,7 @@ window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredIns
 async function installApp(){if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installBanner.style.display="none"}
 window.addEventListener("appinstalled",()=>{installBanner.style.display="none"});
 
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=2.7.1").catch(()=>{}));
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=2.9.0").catch(()=>{}));
 updateStats();showHome();
 window.addEventListener("load",()=>setTimeout(showUpdateNotice,350));
 </script>

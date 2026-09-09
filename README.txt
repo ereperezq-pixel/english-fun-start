@@ -1,19 +1,20 @@
-English Fun Start · Actualización 28 · v2.8.0
+English Fun Start · Actualización 29 · v2.9.0
 English Fun Start · A1 + A2 + B1
 
-3 cursos de 20 niveles: A1, A2 y B1.
-Paso de curso: completar todos los niveles, prueba de 15 preguntas con mínimo 90% (14/15), o clave 1111.
-La clave desbloquea el curso siguiente; no completa niveles del curso actual.
-El juego de parejas no rompe la racha general. B1 añade “Escucha y elige”.
-Si no hay siguiente curso disponible, se muestra “El curso siguiente aún no está terminado.”
-El progreso se guarda en localStorage.
+3 cursos de inglés de 20 niveles: A1, A2 y B1.
+Francés: A1 + A2, cada uno con 20 niveles y progreso independiente.
 
+FRANCÉS A2:
+- Se desbloquea al completar los 20 niveles de Francés A1.
+- También se puede desbloquear superando la prueba final A1 con mínimo 14/15 (90 %).
+- También se puede desbloquear con la clave 1111.
+- 20 niveles con vocabulario, frases y situaciones de dificultad A2.
+- Cada pregunta muestra una frase de ejemplo, traducción y audio.
+- Tras responder hay 4 segundos para leer antes de pasar automáticamente.
+- El progreso francés se guarda en localStorage y no borra el progreso anterior.
 
-Actualización 20 — arquitectura separada iPhone/iOS:
-- index.html mantiene la lógica principal y los juegos.
-- conversation.js mantiene el juego de comprensión auditiva.
-- iphone.css contiene únicamente adaptación visual/safe-area para iPhone.
-- iphone.js contiene únicamente compatibilidad iOS y no sustituye funciones del juego.
-- Se conserva localStorage y el progreso existente.
-
-Actualización 27: selector de idiomas independiente. Inglés mantiene su núcleo; se añade módulo francés A1 separado (frances.html/js/css). Italiano queda preparado como próximamente.
+Actualización 29:
+- Añadido Francés A2 completo.
+- Prueba final A1 y desbloqueo por código.
+- Selector de idiomas actualizado a v2.9.0.
+- Mejoras de audio y estabilidad del módulo francés.

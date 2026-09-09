@@ -1,4 +1,4 @@
-const CACHE_NAME = "english-fun-start-v28";
+const CACHE_NAME = "english-fun-start-v29";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./conversation.js", "./rewards.js", "./iphone.css", "./iphone.js", "./word-help.js", "./word-help.css", "./language-selector.js", "./language-selector.css", "./frances.html", "./frances.js", "./frances.css"];
 
 self.addEventListener("install", event => {
